@@ -210,13 +210,13 @@ GUtilities
  where the C++ backend has been separated out into a {\field{\*\fldinst{HYPERLINK "https://github.com/gu-on/GUtilitiesAPI"}}{\fldrslt{\ul
 public API
 }}}
- callable via ReaScript. Additionally, Mac and Linux support is now provided.\par}
+ callable via ReaScript, and the collection of Lua scripts provided in this repository. Additionally, Mac and Linux support is now provided.\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Installation guide\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 To install this extension, import the following link using {\field{\*\fldinst{HYPERLINK "https://reapack.com/"}}{\fldrslt{\ul
 ReaPack
 }}}
 .\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \f1 https://github.com/gu-on/gutilitiesplus/raw/master/index.xml.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 https://github.com/gu-on/gutilitiesplus/raw/master/index.xml\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Requirements:\par}
 {\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://www.reaper.fm/download.php"}}{\fldrslt{\ul
 Reaper 7.0+
