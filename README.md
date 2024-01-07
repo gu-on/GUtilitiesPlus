@@ -1,23 +1,14 @@
-# ReaPack Repository Template
+Reworking of [GUtilities](https://github.com/gu-on/GUtilities/) where the C++ backend has been separated out into a [public API](https://github.com/gu-on/GUtilitiesAPI) callable via ReaScript. Additionally, Mac and Linux support is now provided.
 
-A template for GitHub-hosted ReaPack repositories with automated
-[reapack-index](https://github.com/cfillion/reapack-index)
-running from GitHub Actions.
+## Installation guide
 
-Replace the name of the repository in [index.xml](/index.xml) when using this template.
-This will be the name shown in ReaPack.
+To install this extension, import the following link using [ReaPack](https://reapack.com/). 
 
-```xml
-<index version="1" name="Name of your repository here">
-```
+	https://github.com/gu-on/gutilitiesplus/raw/master/index.xml.
 
-Replace the contents of this file ([README.md](/README.md)).
-This will be the text shown when using ReaPack's "About this repository" feature.
+### Requirements:
 
-reapack-index looks for package files in subfolders.
-The folder tree represents the package categories shown in ReaPack.
-
-Each package file is expected to begin with a metadata header.
-See [Packaging Documentation](https://github.com/cfillion/reapack-index/wiki/Packaging-Documentation) on reapack-index's wiki.
-
-The URL to import in ReaPack is [https://github.com/`<your username>`/`<repository name>`/raw/master/index.xml](https://github.com/cfillion/reapack-repository-template/raw/master/index.xml).
+- [Reaper 7.0+](https://www.reaper.fm/download.php) (uses Lua 5.4 features)
+- [SWS](https://www.sws-extension.org/)
+- [ReaImGui](https://forum.cockos.com/showthread.php?t=250419) (ReaTeam Extensions)
+- [js_ReaScriptAPI](https://forum.cockos.com/showthread.php?t=212174) (ReaTeam Extensions)
