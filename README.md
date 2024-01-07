@@ -1,3 +1,5 @@
+# GUtilitiesPlus
+
 Reworking of [GUtilities](https://github.com/gu-on/GUtilities/) where the C++ backend has been separated out into a [public API](https://github.com/gu-on/GUtilitiesAPI) callable via ReaScript. Additionally, Mac and Linux support is now provided.
 
 ## Installation guide
