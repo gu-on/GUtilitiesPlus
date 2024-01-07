@@ -1,12 +1,12 @@
 # GUtilitiesPlus
 
-Reworking of [GUtilities](https://github.com/gu-on/GUtilities/) where the C++ backend has been separated out into a [public API](https://github.com/gu-on/GUtilitiesAPI) callable via ReaScript. Additionally, Mac and Linux support is now provided.
+Reworking of [GUtilities](https://github.com/gu-on/GUtilities/) where the C++ backend has been separated out into a [public API](https://github.com/gu-on/GUtilitiesAPI) callable via ReaScript, and the collection of Lua scripts provided in this repository. Additionally, Mac and Linux support is now provided.
 
 ## Installation guide
 
 To install this extension, import the following link using [ReaPack](https://reapack.com/). 
 
-	https://github.com/gu-on/gutilitiesplus/raw/master/index.xml.
+	https://github.com/gu-on/gutilitiesplus/raw/master/index.xml
 
 ### Requirements:
 
