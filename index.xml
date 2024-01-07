@@ -1,23 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="GUtilitiesPlus" commit="58a3e39ba95bd0f35846aa1f39aa4cb2574295e1">
-  <category name="Example">
-    <reapack name="cfillion_Hello world.lua" type="script" desc="Hello world">
+<index version="1" name="GUtilitiesPlus" commit="9058117b89f0f1439f0133ae6203eca57431bb04">
+  <category name="Item Editing">
+    <reapack name="GU_Batch import.lua" type="script" desc="Batch import">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 This is an example of a package file. It installs itself as a ReaScript that does nothing but show "Hello World!" in REAPER's scripting console.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 Packages may also include additional files specified using the @provides tag.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 This text is the documentation shown when using ReaPack's "About this package" feature. {\field{\*\fldinst{HYPERLINK "https://commonmark.org/"}}{\fldrslt{\ul
-Markdown
-}}}
- {\i formatting} is supported.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Batch imports media files recursively from a given source directory\par}
 }
 ]]></description>
       </metadata>
-      <version name="1.0" author="cfillion" time="2021-01-04T23:30:32Z">
-        <source main="main">https://github.com/cfillion/reapack-repository-template/raw/58a3e39ba95bd0f35846aa1f39aa4cb2574295e1/Example/cfillion_Hello%20world.lua</source>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Batch%20import.lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Batch replace source.lua" type="script" desc="Batch replace source">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Batch replaces the source for the selected item's active take Search and replace is run recursively for a given path\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0b" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Pre-release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Batch%20replace%20source.lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Item alias generator.lua" type="script" desc="Item alias generator">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Generates empty items in parent track based on all overlapping items in child tracks\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Item%20alias%20generator.lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Item fader.lua" type="script" desc="Item fader">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Batch fades items based on percentage of length.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Item%20fader.lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Item renamer.lua" type="script" desc="Item renamer">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Batch renames items using similar wildcards annotation as in Reaper's own Render dialog.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Item%20renamer.lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Move selected items to track with same name.lua" type="script" desc="Move selected items to track with same name">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Move items to first found track with the same name\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Move%20selected%20items%20to%20track%20with%20same%20name.lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Set item length (after snap offset).lua" type="script" desc="Set item length after snap offset">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Sets the length of the item to the right of its snap offset (in seconds)\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Set%20item%20length%20(after%20snap%20offset).lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Set item length (before snap offset).lua" type="script" desc="Set item length before snap offset">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Sets the length of the item to the left of its snap offset (in seconds)\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Set%20item%20length%20(before%20snap%20offset).lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Source validator (export to CSV).lua" type="script" desc="Source validator (export to CSV)">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Collates information about source audio within the project. This tool skips loading the GUI, and instead exports directly to CSV.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Source%20validator%20(export%20to%20CSV).lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_Source validator.lua" type="script" desc="Source validator">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Displays collated information about source audio within the project. This tool can also flag files which don't meet user customisable standards.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Source%20validator.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Settings">
+    <reapack name="GU_Config.lua" type="script" desc="GUtilities scripts config">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Provides global settings for GUtilities Scripts This script must be included by ReaPack to ensure all libraries are donwloaded\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Settings/GU_Config.lua</source>
+        <source file="../Include/classic.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Include/classic.lua</source>
+        <source file="../Include/gui_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Include/gui_lib.lua</source>
+        <source file="../Include/reaper_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Include/reaper_lib.lua</source>
+        <source file="../Include/sourcevalidator_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Include/sourcevalidator_lib.lua</source>
+        <source file="../Include/utils_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Include/utils_lib.lua</source>
       </version>
     </reapack>
   </category>
@@ -26,29 +179,36 @@ Markdown
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 ReaPack Repository Template\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 A template for GitHub-hosted ReaPack repositories with automated {\field{\*\fldinst{HYPERLINK "https://github.com/cfillion/reapack-index"}}{\fldrslt{\ul
-reapack-index
+{\pard \ql \f0 \sa180 \li0 \fi0 Reworking of {\field{\*\fldinst{HYPERLINK "https://github.com/gu-on/GUtilities/"}}{\fldrslt{\ul
+GUtilities
 }}}
- running from GitHub Actions.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 Replace the name of the repository in {\field{\*\fldinst{HYPERLINK "/index.xml"}}{\fldrslt{\ul
-index.xml
+ where the C++ backend has been separated out into a {\field{\*\fldinst{HYPERLINK "https://github.com/gu-on/GUtilitiesAPI"}}{\fldrslt{\ul
+public API
 }}}
- when using this template. This will be the name shown in ReaPack.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \f1 <index version="1" name="Name of your repository here">\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 Replace the contents of this file ({\field{\*\fldinst{HYPERLINK "/README.md"}}{\fldrslt{\ul
-README.md
-}}}
-). This will be the text shown when using ReaPack's "About this repository" feature.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 reapack-index looks for package files in subfolders. The folder tree represents the package categories shown in ReaPack.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 Each package file is expected to begin with a metadata header. See {\field{\*\fldinst{HYPERLINK "https://github.com/cfillion/reapack-index/wiki/Packaging-Documentation"}}{\fldrslt{\ul
-Packaging Documentation
-}}}
- on reapack-index's wiki.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 The URL to import in ReaPack is {\field{\*\fldinst{HYPERLINK "https://github.com/cfillion/reapack-repository-template/raw/master/index.xml"}}{\fldrslt{\ul
-https://github.com/{\f1 <your username>}/{\f1 <repository name>}/raw/master/index.xml
+ callable via ReaScript. Additionally, Mac and Linux support is now provided.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Installation guide\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 To install this extension, import the following link using {\field{\*\fldinst{HYPERLINK "https://reapack.com/"}}{\fldrslt{\ul
+ReaPack
 }}}
 .\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 https://github.com/gu-on/gutilitiesplus/raw/master/index.xml.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Requirements:\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://www.reaper.fm/download.php"}}{\fldrslt{\ul
+Reaper 7.0+
+}}}
+ (uses Lua 5.4 features)\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://www.sws-extension.org/"}}{\fldrslt{\ul
+SWS
+}}}
+\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://forum.cockos.com/showthread.php?t=250419"}}{\fldrslt{\ul
+ReaImGui
+}}}
+ (ReaTeam Extensions)\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://forum.cockos.com/showthread.php?t=212174"}}{\fldrslt{\ul
+js_ReaScriptAPI
+}}}
+ (ReaTeam Extensions)\sa180\par}
 }
 ]]></description>
   </metadata>
