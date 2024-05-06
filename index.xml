@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="GUtilitiesPlus" commit="a3f65827a4b08e3ffbfd4f46961ca863af4b2e72">
+<index version="1" name="GUtilitiesPlus" commit="d204503e0de917c2cbbcc2050de6616f16daffda">
   <category name="Extension">
     <reapack name="extension.ext" type="extension" desc="GUtilitiesAPI">
       <metadata>
@@ -83,6 +83,10 @@
       <version name="1.0" author="guonaudio" time="2024-01-07T13:21:33Z">
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Item%20fader.lua</source>
+      </version>
+      <version name="1.1" author="guonaudio" time="2024-05-06T10:12:03Z">
+        <changelog><![CDATA[Added scroll wheel functionality to inputs]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/d204503e0de917c2cbbcc2050de6616f16daffda/Item%20Editing/GU_Item%20fader.lua</source>
       </version>
     </reapack>
     <reapack name="GU_Item renamer.lua" type="script" desc="Item renamer">
