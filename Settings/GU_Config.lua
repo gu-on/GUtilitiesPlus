@@ -1,6 +1,6 @@
 -- @description GUtilities scripts config
 -- @author guonaudio
--- @version 1.0
+-- @version 1.1
 -- @provides
 --   [nomain]../Include/classic.lua
 --   [nomain]../Include/gui_lib.lua
@@ -8,7 +8,7 @@
 --   [nomain]../Include/sourcevalidator_lib.lua
 --   [nomain]../Include/utils_lib.lua
 -- @changelog
---   Initial release
+--   Update library
 -- @about
 --   Provides global settings for GUtilities Scripts
 --   This script must be included by ReaPack to ensure all libraries are donwloaded
