@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="GUtilitiesPlus" commit="d204503e0de917c2cbbcc2050de6616f16daffda">
+<index version="1" name="GUtilitiesPlus" commit="854d8325ca2a694d4a77661952880ddb25b0e14a">
   <category name="Extension">
     <reapack name="extension.ext" type="extension" desc="GUtilitiesAPI">
       <metadata>
@@ -199,6 +199,15 @@
         <source file="../Include/reaper_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Include/reaper_lib.lua</source>
         <source file="../Include/sourcevalidator_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Include/sourcevalidator_lib.lua</source>
         <source file="../Include/utils_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Include/utils_lib.lua</source>
+      </version>
+      <version name="1.1" author="guonaudio" time="2024-05-06T10:18:14Z">
+        <changelog><![CDATA[Update library]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/854d8325ca2a694d4a77661952880ddb25b0e14a/Settings/GU_Config.lua</source>
+        <source file="../Include/classic.lua">https://github.com/gu-on/GUtilitiesPlus/raw/854d8325ca2a694d4a77661952880ddb25b0e14a/Include/classic.lua</source>
+        <source file="../Include/gui_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/854d8325ca2a694d4a77661952880ddb25b0e14a/Include/gui_lib.lua</source>
+        <source file="../Include/reaper_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/854d8325ca2a694d4a77661952880ddb25b0e14a/Include/reaper_lib.lua</source>
+        <source file="../Include/sourcevalidator_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/854d8325ca2a694d4a77661952880ddb25b0e14a/Include/sourcevalidator_lib.lua</source>
+        <source file="../Include/utils_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/854d8325ca2a694d4a77661952880ddb25b0e14a/Include/utils_lib.lua</source>
       </version>
     </reapack>
   </category>
