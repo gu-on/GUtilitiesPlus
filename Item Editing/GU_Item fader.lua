@@ -1,8 +1,8 @@
 -- @description Item fader
 -- @author guonaudio
--- @version 1.0
+-- @version 1.1
 -- @changelog
---   Initial release
+--   Added scroll wheel functionality to inputs
 -- @about
 --   Batch fades items based on percentage of length.
 
@@ -257,6 +257,11 @@ function ItemFader:IsTypedInput()
     return reaper.ImGui_IsItemFocused(self.ctx) and reaper.ImGui_IsEnterKeyPressed(self.ctx)
 end
 
+function ItemFader:GetScrollValueIfHovered()
+    if not reaper.ImGui_IsItemHovered(self.ctx) then return 0 end
+    return math.floor(reaper.ImGui_GetMouseWheel(self.ctx))
+end
+
 function ItemFader:DrawFadeInRatioSlider()
     reaper.ImGui_PushID(self.ctx, "FadeInRatio")
     _, self.fadeInRatio =
@@ -271,6 +276,12 @@ function ItemFader:DrawFadeInRatioSlider()
 
     if self.fadeInRatio > self.fadeOutRatio then
         self.fadeInRatio = self.fadeOutRatio
+        self:FadeSelectedItemsIn()
+    end
+
+    local value = self:GetScrollValueIfHovered()
+    if value ~= 0 then
+        self.fadeInRatio = Maths.Clamp(self.fadeInRatio + value, ItemFader.SLIDER_MIN, ItemFader.SLIDER_MAX)
         self:FadeSelectedItemsIn()
     end
 end
@@ -295,6 +306,12 @@ function ItemFader:DrawFadeOutRatioSlider()
 
     if self.fadeOutRatio < self.fadeInRatio then
         self.fadeOutRatio = self.fadeInRatio
+        self:FadeSelectedItemsOut()
+    end
+
+    local value = self:GetScrollValueIfHovered()
+    if value ~= 0 then
+        self.fadeOutRatio = Maths.Clamp(self.fadeOutRatio + value, ItemFader.SLIDER_MIN, ItemFader.SLIDER_MAX)
         self:FadeSelectedItemsOut()
     end
 end
@@ -354,6 +371,18 @@ function ItemFader:DrawCurvesCombo(fadeInfo, idStr)
     reaper.ImGui_PopStyleColor(self.ctx, 2)
     reaper.ImGui_PopID(self.ctx)
     reaper.ImGui_Spacing(self.ctx)
+
+    self:HandleHoverScrollTransition(fadeInfo)
+end
+
+function ItemFader:HandleHoverScrollTransition(fadeInfo)
+    local value = self:GetScrollValueIfHovered()
+    if value == 0 then return end
+    
+    local next = fadeInfo.shape - value
+    if next >= 0 and next < FadeShape.max then
+        self:Transition(fadeInfo, next)
+    end
 end
 
 function ItemFader:Frame()
@@ -379,20 +408,22 @@ function ItemFader:Frame()
 
         reaper.ImGui_Spacing(self.ctx)
         self.fadeIn:DrawPreviewPlot(self.ctx)
+        self:HandleHoverScrollTransition(self.fadeIn)
 
         self:DrawFadeInRatioSlider()
 
-        self:DrawCurvesCombo(self.fadeIn, "FadeIn");
+        self:DrawCurvesCombo(self.fadeIn, "FadeIn")
 
         -- fade out display
         reaper.ImGui_TableSetColumnIndex(self.ctx, 1)
 
         reaper.ImGui_Spacing(self.ctx)
         self.fadeOut:DrawPreviewPlot(self.ctx)
+        self:HandleHoverScrollTransition(self.fadeOut)
 
         self:DrawFadeOutRatioSlider()
 
-        self:DrawCurvesCombo(self.fadeOut, "FadeOut");
+        self:DrawCurvesCombo(self.fadeOut, "FadeOut")
 
         reaper.ImGui_EndTable(self.ctx)
     end

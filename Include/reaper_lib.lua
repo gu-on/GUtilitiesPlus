@@ -1,4 +1,4 @@
--- @version 1.0
+-- @version 1.1
 -- @noindex
 
 _INCLUDED = _INCLUDED or {}
@@ -166,7 +166,8 @@ FadeShape = {
     fastStartSteep = 3,
     fastEndSteep = 4,
     slowStartEnd = 5,
-    slowStartEndSteep = 6
+    slowStartEndSteep = 6,
+    max = 7
 }
 
 function FadeShape.GetName(index)
