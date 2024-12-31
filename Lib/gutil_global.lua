@@ -1,6 +1,6 @@
 -- @description GUtilities libraries
 -- @author guonaudio
--- @version 1.0
+-- @version 1.1
 -- @provides 
 --   [nomain] .
 --   [nomain] Lua/gutil_classic.lua
