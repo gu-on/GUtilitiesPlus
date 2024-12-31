@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="GUtilitiesPlus" commit="854d8325ca2a694d4a77661952880ddb25b0e14a">
+<index version="1" name="GUtilitiesPlus" commit="8382d6aa3a5f4661cbd82e15742b02649fe43d92">
   <category name="Extension">
     <reapack name="extension.ext" type="extension" desc="GUtilitiesAPI">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -22,12 +22,25 @@
         <source platform="win64" file="reaper_gutilitiesapi-x64.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.0/reaper_gutilitiesapi-x64.dll</source>
         <source platform="win32" file="reaper_gutilitiesapi-x86.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.0/reaper_gutilitiesapi-x86.dll</source>
       </version>
+      <version name="0.1.2" author="guonaudio" time="2024-12-31T14:11:30Z">
+        <changelog><![CDATA[- Added support for more platforms]]></changelog>
+        <source platform="darwin32" file="reaper_gutilities-i386.dylib">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-i386.dylib</source>
+        <source platform="darwin64" file="reaper_gutilities-x86_64.dylib">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-x86_64.dylib</source>
+        <source platform="darwin-arm64" file="reaper_gutilities-arm64.dylib">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-arm64.dylib</source>
+        <source platform="linux32" file="reaper_gutilitiesapi-i686.so">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-i686.so</source>
+        <source platform="linux64" file="reaper_gutilitiesapi-x86_64.so">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-x86_64.so</source>
+        <source platform="linux-armv7l" file="reaper_gutilitiesapi-armv7l.so">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-armv7l.so</source>
+        <source platform="linux-aarch64" file="reaper_gutilitiesapi-aarch64.so">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-aarch64.so</source>
+        <source platform="win32" file="reaper_gutilitiesapi-x86.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-x86.dll</source>
+        <source platform="win64" file="reaper_gutilitiesapi-x64.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-x64.dll</source>
+        <source platform="windows-arm64ec" file="reaper_gutilitiesapi-arm64ec.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-arm64ec.dll</source>
+      </version>
     </reapack>
   </category>
   <category name="Item Editing">
     <reapack name="GU_Batch import.lua" type="script" desc="Batch import">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -39,10 +52,14 @@
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Batch%20import.lua</source>
       </version>
+      <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Batch%20import.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Batch replace source.lua" type="script" desc="Batch replace source">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -54,10 +71,14 @@
         <changelog><![CDATA[Pre-release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Batch%20replace%20source.lua</source>
       </version>
+      <version name="1.1b" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Batch%20replace%20source.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Item alias generator.lua" type="script" desc="Item alias generator">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -69,10 +90,14 @@
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Item%20alias%20generator.lua</source>
       </version>
+      <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Item%20alias%20generator.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Item fader.lua" type="script" desc="Item fader">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -88,10 +113,14 @@
         <changelog><![CDATA[Added scroll wheel functionality to inputs]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/d204503e0de917c2cbbcc2050de6616f16daffda/Item%20Editing/GU_Item%20fader.lua</source>
       </version>
+      <version name="1.2" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Item%20fader.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Item renamer.lua" type="script" desc="Item renamer">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -103,10 +132,14 @@
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Item%20renamer.lua</source>
       </version>
+      <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Item%20renamer.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Move selected items to track with same name.lua" type="script" desc="Move selected items to track with same name">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -118,10 +151,14 @@
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Move%20selected%20items%20to%20track%20with%20same%20name.lua</source>
       </version>
+      <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Move%20selected%20items%20to%20track%20with%20same%20name.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Set item length (after snap offset).lua" type="script" desc="Set item length after snap offset">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -133,10 +170,14 @@
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Set%20item%20length%20(after%20snap%20offset).lua</source>
       </version>
+      <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Set%20item%20length%20(after%20snap%20offset).lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Set item length (before snap offset).lua" type="script" desc="Set item length before snap offset">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -148,10 +189,30 @@
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Set%20item%20length%20(before%20snap%20offset).lua</source>
       </version>
+      <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server
+Fixed bug where Item with Take containing stretch markers wouldn't be affected]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Set%20item%20length%20(before%20snap%20offset).lua</source>
+      </version>
+    </reapack>
+    <reapack name="GU_SFZ creator.lua" type="script" desc="SFZ creator">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Move items to first found track with the same name\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0b" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Initial Release]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_SFZ%20creator.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Source validator (export to CSV).lua" type="script" desc="Source validator (export to CSV)">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -163,10 +224,14 @@
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Source%20validator%20(export%20to%20CSV).lua</source>
       </version>
+      <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Source%20validator%20(export%20to%20CSV).lua</source>
+      </version>
     </reapack>
-    <reapack name="GU_Source validator.lua" type="script" desc="Source validator">
+    <reapack name="GU_Source validator.lua" type="script" desc="Source Validator">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -178,12 +243,16 @@
         <changelog><![CDATA[Initial release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/9058117b89f0f1439f0133ae6203eca57431bb04/Item%20Editing/GU_Source%20validator.lua</source>
       </version>
+      <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Source%20validator.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="Settings">
     <reapack name="GU_Config.lua" type="script" desc="GUtilities scripts config">
       <metadata>
-        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
@@ -209,14 +278,18 @@
         <source file="../Include/sourcevalidator_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/854d8325ca2a694d4a77661952880ddb25b0e14a/Include/sourcevalidator_lib.lua</source>
         <source file="../Include/utils_lib.lua">https://github.com/gu-on/GUtilitiesPlus/raw/854d8325ca2a694d4a77661952880ddb25b0e14a/Include/utils_lib.lua</source>
       </version>
+      <version name="1.2" author="guonaudio" time="2024-12-31T18:14:20Z">
+        <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Settings/GU_Config.lua</source>
+      </version>
     </reapack>
   </category>
   <metadata>
-    <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+    <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs36 GUtilitiesPlus\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel0 \b \fs36 GUtilitiesPlus\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 Reworking of {\field{\*\fldinst{HYPERLINK "https://github.com/gu-on/GUtilities/"}}{\fldrslt{\ul
 GUtilities
 }}}
@@ -224,13 +297,13 @@ GUtilities
 public API
 }}}
  callable via ReaScript, and the collection of Lua scripts provided in this repository. Additionally, Mac and Linux support is now provided.\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Installation guide\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel1 \b \fs32 Installation guide\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 To install this extension, import the following link using {\field{\*\fldinst{HYPERLINK "https://reapack.com/"}}{\fldrslt{\ul
 ReaPack
 }}}
 .\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 \f1 https://github.com/gu-on/gutilitiesplus/raw/master/index.xml\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Requirements:\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \outlinelevel2 \b \fs28 Requirements:\par}
 {\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://www.reaper.fm/download.php"}}{\fldrslt{\ul
 Reaper 7.0+
 }}}
