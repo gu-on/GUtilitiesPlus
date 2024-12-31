@@ -1,44 +1,54 @@
--- @version 1.0
 -- @noindex
 
---#region ValidatorData
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
+require('lua.gutil_classic')
+require('lua.gutil_color')
+require('lua.gutil_table')
+require('lua.gutil_filesystem')
+require('reaper.gutil_config')
+require('reaper.gutil_gui')
+require('reaper.gutil_item')
+require('reaper.gutil_project')
+require('reaper.gutil_source')
+require('reaper.gutil_progressbar')
+require('reaper.gutil_os')
+require('reaper.gutil_take')
+require('reaper.gutil_track')
+
+---@class (exact) ValidatorData : Object
+---@operator call : ValidatorData
+---@field selected boolean
+---@field path string
+---@field index integer
+---@field name string
+---@field fileFormat string
+---@field channelCount integer
+---@field length number
+---@field sampleRate integer
+---@field bitDepth integer
+---@field peak number
+---@field loudness number
+---@field silenceIn number
+---@field silenceOut number
+---@field isZeroStart boolean
+---@field isZeroEnd boolean
+---@field hasRegion boolean
+---@field isMono boolean
 ValidatorData = Object:extend()
 
-function ValidatorData:new()
-    self.selected = false
-    self.path = ""
-    self.index = 0
-    self.name = ""
-    self.fileFormat = ""
-    self.channelCount = 0
-    self.length = 0
-    self.sampleRate = 0
-    self.bitDepth = 0
-    self.peak = 0
-    self.loudness = 0
-    self.silenceIn = 0
-    self.silenceOut = 0
-    self.isZeroStart = false
-    self.isZeroEnd = false
-    self.hasRegion = false
-    self.isMono = false
-end
-
-SilenceDetectionAlgorithm = {
-    Peak = 0,
-    RMS = 1
-}
+---@alias SilenceDetectionAlgorithm
+---| 0 # Peak
+---| 1 # RMS
 
 function ValidatorData:__eq(other)
     return other:is(ValidatorData) and self.path == other.path
 end
 
---#endregion ValidatorData
-
---#region ValidatorProperty
-
+---@class ValidatorProperty : Object
 ValidatorProperty = Object:extend()
+
 ValidatorProperty.Type = {
     Index = 0,
     Name = 1,
@@ -85,89 +95,96 @@ end
 
 local vp <const> = ValidatorProperty
 
---#endregion ValidatorProperty
-
---#region SourceValidator
-
+---@class SrcValidator : Object
+---@operator call: SrcValidator
+---@field detectionAlgorithm SilenceDetectionAlgorithm
 SrcValidator = Object:extend()
 
 function SrcValidator:new()
     self.data = {}
-    self.items = Items()
+    self.project = Project(THIS_PROJECT) ---@type Project
+    self.items = {} ---@type Item[]
 
-    self.progBar = {}
-    self.progBar.gui = {}
-    self.progBar.num = 0
-    self.progBar.denom = 0
+    self.prog = {}
+    self.prog.gui = nil ---@type ProgressBar?
+    self.prog.num = 0
+    self.prog.denom = 0
+
+    return self
 end
 
 function SrcValidator:FillItemsFromProject()
     table.clear(self.data)
-    self.items:FillAll()
-    self.progBar.gui = nil
+    self.items = self.project:GetAllItems()
+    self.prog.gui = nil
 end
 
 function SrcValidator:FillItemsFromSelection()
     table.clear(self.data)
-    self.items:FillSelected()
-    self.progBar.gui = nil
+    self.items = self.project:GetSelectedItems()
+    self.prog.gui = nil
 end
 
 function SrcValidator:TryFillDataSync()
-    if reaper.MB("Reaper will appear unresponsive while your items are processed.\nDo you want to continue?", "Warning", MessageBoxType.OKCANCEL) == MessageBoxReturn.CANCEL then
-        table.clear(self.items.array)
+    local input <const> = Dialog.MB("Reaper will appear unresponsive while your items are processed.\nDo you want to continue?", "Warning", 4)
+    if input == 7 then
+        table.clear(self.items)
     end
 
-    if table.isEmpty(self.items.array) then return end
+    if table.isEmpty(self.items) then return end
 
-    while not table.isEmpty(self.items.array) do
+    while not table.isEmpty(self.items) do
         self:FillData()
     end
 end
 
 function SrcValidator:TryFillDataAsync()
-    if table.isEmpty(self.items.array) then
-        self.progBar.gui = nil
+    if table.isEmpty(self.items) then
+        self.prog.gui = nil
         return
     end
 
-    if self.progBar.gui == nil then
-        self:InitProgressBar(#self.items.array)
+    if self.prog.gui == nil then
+        self:InitProgressBar(#self.items)
     end
 
-    if self.progBar.gui ~= nil then
-        if self.progBar.gui.fraction >= 1 then
-            self.progBar.gui = nil
-        elseif not reaper.ImGui_ValidatePtr(self.progBar.gui.ctx, "ImGui_Context*") then
-            self.progBar.gui = nil
+    if self.prog.gui ~= nil then
+        if self.prog.gui.fraction ~= nil and self.prog.gui.fraction >= 1 then
+            self.prog.gui = nil
+        elseif not ImGui.ValidatePtr(self.prog.gui.ctx, "ImGui_Context*") then
+            self.prog.gui = nil
         else
             reaper.defer(function () self:FillData() end)
         end
     end
 end
 
+---@param count integer --- number to iterate over
 function SrcValidator:InitProgressBar(count)
-    self.progBar.num = 0
-    self.progBar.denom = count
-    self.progBar.gui = ProgressBar("progress bar")
-    self.progBar.gui:Loop()
+    self.prog.num = 0
+    self.prog.denom = count
+    self.prog.gui = ProgressBar("progress bar")
+    self.prog.gui:Loop()
 end
 
 function SrcValidator:FillData()
-    self.progBar.num = self.progBar.num + 1
+    self.prog.num = self.prog.num + 1
 
-    if self.progBar.gui ~= nil then
-        self.progBar.gui.fraction = self.progBar.num / self.progBar.denom
+    if self.prog.gui ~= nil then
+        assert(self.prog.denom ~= nil and self.prog.denom > 0)
+        self.prog.gui.fraction = self.prog.num / self.prog.denom
     end
 
-    if not table.isEmpty(self.items.array) then
-        local item <const> = self.items.array[1]
-        local takePtr <const> = item:GetActiveTakePtr()
-        local take <const> = takePtr ~= nil and Take(takePtr) or nil
-        local sourcePtr <const> = take ~= nil and take:GetSourcePtr() or nil
-        local source <const> = (sourcePtr ~= nil) and Source(sourcePtr) or nil
+    if not table.isEmpty(self.items) then
+        local item <const> = self.items[1] ---@type Item
+        --assert(item, "table is not empty, but getting nil item")
+        if not item then goto removeItem end
 
-        if source == nil or not source:IsValid() then goto removeItem end
+        local take <const> = item:GetActiveTake()
+        if not take then goto removeItem end
+
+        local source <const> = take:GetSource()
+        if not source or not source:IsValid() then goto removeItem end
 
         local data <const> = ValidatorData()
         data.path = source:GetPath()
@@ -188,10 +205,10 @@ function SrcValidator:FillData()
         data.bitDepth = source:GetBitDepth()
         data.peak = source:GetPeak()
         data.loudness = source:GetLUFS()
-        data.silenceIn = self.detectionAlgorithm == SilenceDetectionAlgorithm.Peak and
+        data.silenceIn = self.detectionAlgorithm == 0 and
             source:GetTimeToPeak(self.bufferSize, self.silenceThreshold) or
             source:GetTimeToRMS(self.bufferSize, self.silenceThreshold)
-        data.silenceOut = self.detectionAlgorithm == SilenceDetectionAlgorithm.Peak and
+        data.silenceOut = self.detectionAlgorithm == 0 and
             source:GetTimeToPeakR(self.bufferSize, self.silenceThreshold) or
             source:GetTimeToRMSR(self.bufferSize, self.silenceThreshold)
         data.isZeroStart = source:IsFirstSampleZero(Maths.DB2VOL(self.silenceThreshold))
@@ -204,10 +221,10 @@ function SrcValidator:FillData()
 
     ::removeItem::
 
-    table.remove(self.items.array, 1)
+    table.remove(self.items, 1)
 
-    if self.progBar.gui ~= nil and self.progBar.gui.shouldTerminate then
-        table.clear(self.items.array)
+    if self.prog.gui ~= nil and self.prog.gui.shouldTerminate then
+        table.clear(self.items)
     end
 end
 
@@ -217,21 +234,17 @@ function SrcValidator:UpdateSettings(algorithm, threshold, bufferSize)
     self.bufferSize = bufferSize
 end
 
---#endregion SourceValidator
-
---#region Selections
-
+---@class AudioFormatSelection
 AudioFormatSelection = Object:extend()
 
 function AudioFormatSelection:new(name)
     self.isSelected = false
     self.name = name
+
+    return self
 end
 
---#endregion Selections
-
---#region GuiSrcValidator
-
+---@class GuiSrcValidator : GuiBase
 GuiSrcValidator = GuiBase:extend()
 
 GuiSrcValidator.Properties = {}
@@ -273,74 +286,82 @@ for _, name in pairs(reaper.AudioFormats) do
     table.insert(GuiSrcValidator.AudioFormatSelections, AudioFormatSelection(name))
 end
 
+---@alias relation "<" | ">"
+
+---@param name string
+---@param undoText string
+---@param isAsync boolean
 function GuiSrcValidator:new(name, undoText, isAsync)
     GuiSrcValidator.super.new(self, name, undoText)
+
     self.validator = SrcValidator()
     self.isAsync = isAsync
 
     -- config
-    self.config = Config(FileSys.GetRawName(name))
-    self.config.csvPath = "csvPath"
-    self.config.radioFlags = "radioFlags"
-    self.config.shortTitles = "shortTitles"
-    self.config.algorithm = "algorithm"
-    self.config.bufferSize = "bufferSize"
-    self.config.threshold = "threshold"
-    self.config.rgb = "rgb"
-    self.config.fileFormat = "fileFormat"
-    self.config.channels = "channels"
-    self.config.length = "length"
-    self.config.sampleRate = "sampleRate"
-    self.config.bitDepth = "bitDepth"
-    self.config.peak = "peak"
-    self.config.loudness = "loudness"
-    self.config.silenceIn = "silenceIn"
-    self.config.silenceOut = "silenceOut"
-    self.config.conditional = "conditional"
-    self.config.shouldCheck = "shouldCheck"
+    self.config = Config(FileSys.GetRawName(name)) ---@type Config
 
-    self.isShortTitles = self.config:Read(self.config.shortTitles) or false
-    self.radioFlags = self.config:Read(self.config.radioFlags) or 1
+    self.cfgInfo = {}
+    self.cfgInfo.csvPath = "csvPath"
+    self.cfgInfo.radioFlags = "radioFlags"
+    self.cfgInfo.shortTitles = "shortTitles"
+    self.cfgInfo.algorithm = "algorithm"
+    self.cfgInfo.bufferSize = "bufferSize"
+    self.cfgInfo.threshold = "threshold"
+    self.cfgInfo.rgb = "rgb"
+    self.cfgInfo.fileFormat = "fileFormat"
+    self.cfgInfo.channels = "channels"
+    self.cfgInfo.length = "length"
+    self.cfgInfo.sampleRate = "sampleRate"
+    self.cfgInfo.bitDepth = "bitDepth"
+    self.cfgInfo.peak = "peak"
+    self.cfgInfo.loudness = "loudness"
+    self.cfgInfo.silenceIn = "silenceIn"
+    self.cfgInfo.silenceOut = "silenceOut"
+    self.cfgInfo.conditional = "conditional"
+    self.cfgInfo.shouldCheck = "shouldCheck"
+
+    self.isShortTitles = self.config:ReadBool(self.cfgInfo.shortTitles) or false
+    self.radioFlags = self.config:ReadNumber(self.cfgInfo.radioFlags) or 1
     self.tableFlags = GuiSrcValidator.TableFlag[self.radioFlags][2]
-    self.threshold = self.config:Read(self.config.threshold) or -144.0
-    self.detectionAlgorithm = self.config:Read(self.config.algorithm) or 0
-    self.bufferSize = self.config:Read(self.config.bufferSize) or 32
+    self.threshold = self.config:ReadNumber(self.cfgInfo.threshold) or -144.0
+    self.detectionAlgorithm = self.config:ReadNumber(self.cfgInfo.algorithm) or 0
+    self.bufferSize = toint(self.config:ReadNumber(self.cfgInfo.bufferSize) or 32)
     self.popUp = "Deviations" -- used as an id to keep track of popup
 
     GuiSrcValidator.Properties[ValidatorProperty.Type.FileFormat].shouldCheck =
-        self.config:Read(self.config.fileFormat .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.fileFormat .. self.cfgInfo.shouldCheck)
     GuiSrcValidator.Properties[ValidatorProperty.Type.Channels].shouldCheck =
-        self.config:Read(self.config.channels .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.channels .. self.cfgInfo.shouldCheck)
     GuiSrcValidator.Properties[ValidatorProperty.Type.Length].shouldCheck =
-        self.config:Read(self.config.length .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.length .. self.cfgInfo.shouldCheck)
     GuiSrcValidator.Properties[ValidatorProperty.Type.SampleRate].shouldCheck =
-        self.config:Read(self.config.sampleRate .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.sampleRate .. self.cfgInfo.shouldCheck)
     GuiSrcValidator.Properties[ValidatorProperty.Type.BitDepth].shouldCheck =
-        self.config:Read(self.config.bitDepth .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.bitDepth .. self.cfgInfo.shouldCheck)
     GuiSrcValidator.Properties[ValidatorProperty.Type.Peak].shouldCheck =
-        self.config:Read(self.config.peak .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.peak .. self.cfgInfo.shouldCheck)
     GuiSrcValidator.Properties[ValidatorProperty.Type.Loudness].shouldCheck =
-        self.config:Read(self.config.loudness .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.loudness .. self.cfgInfo.shouldCheck)
     GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceIn].shouldCheck =
-        self.config:Read(self.config.silenceIn .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.silenceIn .. self.cfgInfo.shouldCheck)
     GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceOut].shouldCheck =
-        self.config:Read(self.config.silenceOut .. self.config.shouldCheck)
+        self.config:ReadBool(self.cfgInfo.silenceOut .. self.cfgInfo.shouldCheck)
 
-    self.currentFileFormat = self.config:Read(self.config.fileFormat) or reaper.AudioFormats[1]
-    self.currentChannels = self.config:Read(self.config.channels) or 2
-    self.currentLength = self.config:Read(self.config.length) or 0
-    self.currentLengthRelationCombo = self.config:Read(self.config.length .. self.config.conditional) or '<'
-    self.currentSampleRate = self.config:Read(self.config.sampleRate) or 44100
-    self.currentBitDepth = self.config:Read(self.config.bitDepth) or 24
-    self.currentPeak = self.config:Read(self.config.peak) or 0
-    self.currentPeakRelationCombo = self.config:Read(self.config.peak .. self.config.conditional) or '<'
-    self.currentLoudness = self.config:Read(self.config.loudness) or 0
-    self.currentLoudnessRelationCombo = self.config:Read(self.config.loudness .. self.config.conditional) or '<'
-    self.currentSilenceIn = self.config:Read(self.config.silenceIn) or 0
-    self.currentSilenceOut = self.config:Read(self.config.silenceOut) or 0
+    self.currentFileFormat = self.config:ReadString(self.cfgInfo.fileFormat) or reaper.AudioFormats[1]
+    self.currentChannels = toint(self.config:ReadNumber(self.cfgInfo.channels) or 2)
+    self.currentLength = self.config:ReadNumber(self.cfgInfo.length) or 0
+    self.currentLengthRelationCombo = self.config:ReadString(self.cfgInfo.length .. self.cfgInfo.conditional) or '<'
+    self.currentSampleRate = toint(self.config:ReadNumber(self.cfgInfo.sampleRate) or 44100)
+    self.currentBitDepth = toint(self.config:ReadNumber(self.cfgInfo.bitDepth) or 24)
+    self.currentPeak = self.config:ReadNumber(self.cfgInfo.peak) or 0
+    self.currentPeakRelationCombo = self.config:ReadString(self.cfgInfo.peak .. self.cfgInfo.conditional) or '<'
+    self.currentLoudness = self.config:ReadNumber(self.cfgInfo.loudness) or 0
+    self.currentLoudnessRelationCombo = self.config:ReadString(self.cfgInfo.loudness .. self.cfgInfo.conditional) or '<'
+    self.currentSilenceIn = self.config:ReadNumber(self.cfgInfo.silenceIn) or 0
+    self.currentSilenceOut = self.config:ReadNumber(self.cfgInfo.silenceOut) or 0
 
     -- colors
-    local colors <const> = Col.GetColorTable(self.config:Read(self.config.rgb))
+    local colors <const> = Color.GetColorTable(self.config:ReadNumber(self.cfgInfo.rgb))
     self.curR = colors.red or 255
     self.curB = colors.blue or 0
     self.curG = colors.green or 0
@@ -348,74 +369,77 @@ function GuiSrcValidator:new(name, undoText, isAsync)
     -- gui
     self.windowWidth = 1280
     self.windowHeight = 720
-    self.windowFlags = self.windowFlags + reaper.ImGui_WindowFlags_MenuBar()
+    self.windowFlags = self.windowFlags + ImGui.WindowFlags_MenuBar
     self.relationalComboWidth = self.font.size * 2 + 10
+
+    return self
 end
 
 function GuiSrcValidator:CreateCSVFileName()
-    local t <const> = os.date("*t")
+    local time <const> = os.date("*t")
+    -- todo check this
     local projectName = "SourceValidator_" .. reaper.GetProjectName(THIS_PROJECT)
-    if not GUtil.IsNilOrEmpty(projectName) then
+    if not Str.IsNilOrEmpty(projectName) then
         projectName = projectName .. "_"
     end
     return projectName ..
-        t.year .. "_" .. t.month .. "_" .. t.day .. "_" .. t.hour .. "_" .. t.min .. "_" .. t.sec .. ".csv"
+        time.year .. "_" .. time.month .. "_" .. time.day .. "_" .. time.hour .. "_" .. time.min .. "_" .. time.sec .. ".csv"
 end
 
 function GuiSrcValidator:CurrentColor()
-    return Col.CreateRGBA(self.curR, self.curG, self.curB)
+    return Color.CreateRGBA(self.curR, self.curG, self.curB)
 end
 
 function GuiSrcValidator:AsyncFrame()
-    -- check state change
-    if reaper.ImGui_BeginMenuBar(self.ctx) then
-        if reaper.ImGui_BeginMenu(self.ctx, "File") then
-            if reaper.ImGui_MenuItem(self.ctx, "Copy") then
+    -- todo: check state change
+    if ImGui.BeginMenuBar(self.ctx) then
+        if ImGui.BeginMenu(self.ctx, "File") then
+            if ImGui.MenuItem(self.ctx, "Copy") then
                 self:CopyToClipboard();
             end
 
-            if reaper.ImGui_MenuItem(self.ctx, "Export CSV...") then
+            if ImGui.MenuItem(self.ctx, "Export CSV...") then
                 self:PrintToCSV();
             end
 
-            reaper.ImGui_EndMenu(self.ctx)
+            ImGui.EndMenu(self.ctx)
         end
 
-        if reaper.ImGui_BeginMenu(self.ctx, "Settings") then
+        if ImGui.BeginMenu(self.ctx, "Settings") then
             self:Menu_TableView();
             self:Menu_Detection();
             self:Menu_ColorSelector();
-            _, self.isShortTitles = reaper.ImGui_Checkbox(self.ctx, "Use Short Titles", self.isShortTitles);
+            _, self.isShortTitles = ImGui.Checkbox(self.ctx, "Use Short Titles", self.isShortTitles);
 
-            reaper.ImGui_EndMenu(self.ctx);
+            ImGui.EndMenu(self.ctx);
         end
-        reaper.ImGui_EndMenuBar(self.ctx)
+        ImGui.EndMenuBar(self.ctx)
     end
 
-    if reaper.ImGui_Button(self.ctx, "Check All Items") then
+    if ImGui.Button(self.ctx, "Check All Items") then
         self.validator:UpdateSettings(self.detectionAlgorithm, self.threshold, self.bufferSize)
         self.validator:FillItemsFromProject()
     end
 
-    reaper.ImGui_SameLine(self.ctx)
+    ImGui.SameLine(self.ctx)
 
-    if reaper.ImGui_Button(self.ctx, "Check Selected Items") then
+    if ImGui.Button(self.ctx, "Check Selected Items") then
         self.validator:UpdateSettings(self.detectionAlgorithm, self.threshold, self.bufferSize)
         self.validator:FillItemsFromSelection()
     end
 
-    reaper.ImGui_SameLine(self.ctx)
+    ImGui.SameLine(self.ctx)
 
-    if reaper.ImGui_Button(self.ctx, "Set Validation Settings") then
-        reaper.ImGui_OpenPopup(self.ctx, self.popUp)
+    if ImGui.Button(self.ctx, "Set Validation Settings") then
+        ImGui.OpenPopup(self.ctx, self.popUp)
     end
 
-    if reaper.ImGui_BeginPopup(self.ctx, self.popUp) then
+    if ImGui.BeginPopup(self.ctx, self.popUp) then
         local offsetA <const> = self.font.size * 10
         local offsetB <const> = offsetA + self.relationalComboWidth + 4
 
-        reaper.ImGui_Text(self.ctx, "Validation Toggle")
-        reaper.ImGui_Separator(self.ctx)
+        ImGui.Text(self.ctx, "Validation Toggle")
+        ImGui.Separator(self.ctx)
 
         self:DrawCheck_FileFormat(offsetB);
         self:DrawCheck_ChannelCount(offsetB);
@@ -427,26 +451,27 @@ function GuiSrcValidator:AsyncFrame()
         self:DrawCheck_SilenceForward(offsetB);
         self:DrawCheck_SilenceBackward(offsetB);
 
-        reaper.ImGui_EndPopup(self.ctx)
+        ImGui.EndPopup(self.ctx)
     end
 
     self.validator:TryFillDataAsync()
 
-    if reaper.ImGui_BeginTable(self.ctx, "Items", #GuiSrcValidator.Properties, self.tableFlags) then
-        reaper.ImGui_TableNext(self.ctx)
+    if ImGui.BeginTable(self.ctx, "Items", #GuiSrcValidator.Properties, self.tableFlags) then
+        ImGuiExt.TableNext(self.ctx)
         for _, property in pairs(GuiSrcValidator.Properties) do
-            reaper.ImGui_TableHeader(self.ctx, self.isShortTitles and property.abbreviation or property.title)
+            ImGuiExt.TableHeading(self.ctx, self.isShortTitles and property.abbreviation or property.title)
 
-            if reaper.ImGui_IsItemHovered(self.ctx) then
-                reaper.ImGui_BeginTooltip(self.ctx)
-                reaper.ImGui_Text(self.ctx, property.toolTip)
-                reaper.ImGui_EndTooltip(self.ctx)
+            if ImGui.IsItemHovered(self.ctx) then
+                if ImGui.BeginTooltip(self.ctx) then
+                    ImGui.Text(self.ctx, property.toolTip)
+                    ImGui.EndTooltip(self.ctx)
+                end
             end
         end
 
         for _, data in pairs(self.validator.data) do
-            reaper.ImGui_TableNext(self.ctx)
-            reaper.ImGui_Text(self.ctx, tostring(data.index)); -- index
+            ImGuiExt.TableNext(self.ctx)
+            ImGui.Text(self.ctx, tostring(data.index)); -- index
 
             self:DrawTable_Name(data.name);
             self:DrawTable_FileFormat(data.fileFormat);
@@ -464,19 +489,19 @@ function GuiSrcValidator:AsyncFrame()
             self:DrawTable_IsMono(data.isMono);
         end
 
-        reaper.ImGui_EndTable(self.ctx)
+        ImGui.EndTable(self.ctx)
     end
 end
 
 function GuiSrcValidator:SyncFrame()
-    Debug:Log("Processing, please wait...\n")
+    Debug.Log("Processing, please wait...\n")
     self.validator:UpdateSettings(self.detectionAlgorithm, self.threshold, self.bufferSize)
     self.validator:FillItemsFromProject()
     self.validator:TryFillDataSync()
     if not table.isEmpty(self.validator.data) then
         self:PrintToCSV()
     end
-    Debug:Log("Final source media items processed: %i\n", #self.validator.data)
+    Debug.Log("Final source media items processed: %i\n", #self.validator.data)
     self:Close()
 end
 
@@ -489,280 +514,285 @@ function GuiSrcValidator:Frame()
 end
 
 function GuiSrcValidator:DrawTable_Name(name)
-    reaper.ImGui_TableNextColumnEntry(self.ctx, name, Col.White)
+    ImGuiExt.TableNextColumnEntry(self.ctx, name, Color.White)
 end
 
 function GuiSrcValidator:DrawTable_FileFormat(fileFormat)
     fileFormat = string.upper(fileFormat)
     local col <const> = (GuiSrcValidator.Properties[ValidatorProperty.Type.FileFormat].shouldCheck and fileFormat ~= self.currentFileFormat) and
-        self:CurrentColor() or Col.White
-    reaper.ImGui_TableNextColumnEntry(self.ctx, string.format("%s", fileFormat), col)
+        self:CurrentColor() or Color.White
+    ImGuiExt.TableNextColumnEntry(self.ctx, string.format("%s", fileFormat), col)
 end
 
 function GuiSrcValidator:DrawTable_ChannelCount(channelCount)
     local col <const> = (GuiSrcValidator.Properties[ValidatorProperty.Type.Channels].shouldCheck and channelCount ~= self.currentChannels) and
-        self:CurrentColor() or Col.White
-    reaper.ImGui_TableNextColumnEntry(self.ctx, channelCount, col)
+        self:CurrentColor() or Color.White
+    ImGuiExt.TableNextColumnEntry(self.ctx, channelCount, col)
 end
 
 function GuiSrcValidator:DrawTable_Length(length)
     local col = 0
     if self.currentLengthRelationCombo == '<' then
         col = (GuiSrcValidator.Properties[ValidatorProperty.Type.Length].shouldCheck and length >= self.currentLength) and
-            self:CurrentColor() or Col.White
+            self:CurrentColor() or Color.White
     else
         col = (GuiSrcValidator.Properties[ValidatorProperty.Type.Length].shouldCheck and length <= self.currentLength) and
-            self:CurrentColor() or Col.White
+            self:CurrentColor() or Color.White
     end
-    reaper.ImGui_TableNextColumnEntry(self.ctx, string.format("%.3f s", length), col)
+    ImGuiExt.TableNextColumnEntry(self.ctx, string.format("%.3f s", length), col)
 end
 
 function GuiSrcValidator:DrawTable_SampleRate(sampleRate)
     local col <const> = (GuiSrcValidator.Properties[ValidatorProperty.Type.SampleRate].shouldCheck and sampleRate ~= self.currentSampleRate) and
-        self:CurrentColor() or Col.White
-    reaper.ImGui_TableNextColumnEntry(self.ctx, string.format("%.1f kHz", sampleRate / 1000), col)
+        self:CurrentColor() or Color.White
+    ImGuiExt.TableNextColumnEntry(self.ctx, string.format("%.1f kHz", sampleRate / 1000), col)
 end
 
 function GuiSrcValidator:DrawTable_BitDepth(bitDepth)
     local col <const> = (GuiSrcValidator.Properties[ValidatorProperty.Type.BitDepth].shouldCheck and bitDepth ~= self.currentBitDepth) and
-        self:CurrentColor() or Col.White
-    reaper.ImGui_TableNextColumnEntry(self.ctx, bitDepth, col)
+        self:CurrentColor() or Color.White
+    ImGuiExt.TableNextColumnEntry(self.ctx, bitDepth, col)
 end
 
 function GuiSrcValidator:DrawTable_Peak(peak)
     local col = 0
     if self.currentPeakRelationCombo == '<' then
         col = (GuiSrcValidator.Properties[ValidatorProperty.Type.Peak].shouldCheck and peak >= self.currentPeak) and
-            self:CurrentColor() or Col.White
+            self:CurrentColor() or Color.White
     else
         col = (GuiSrcValidator.Properties[ValidatorProperty.Type.Peak].shouldCheck and peak <= self.currentPeak) and
-            self:CurrentColor() or Col.White
+            self:CurrentColor() or Color.White
     end
-    reaper.ImGui_TableNextColumnEntry(self.ctx, string.format("%.1f", peak), col)
+    ImGuiExt.TableNextColumnEntry(self.ctx, string.format("%.1f", peak), col)
 end
 
 function GuiSrcValidator:DrawTable_Loudness(loudness)
     local col = 0
     if self.currentLoudnessRelationCombo == '<' then
         col = (GuiSrcValidator.Properties[ValidatorProperty.Type.Loudness].shouldCheck and loudness >= self.currentLoudness) and
-            self:CurrentColor() or Col.White
+            self:CurrentColor() or Color.White
     else
         col = (GuiSrcValidator.Properties[ValidatorProperty.Type.Loudness].shouldCheck and loudness <= self.currentLoudness) and
-            self:CurrentColor() or Col.White
+            self:CurrentColor() or Color.White
     end
-    reaper.ImGui_TableNextColumnEntry(self.ctx, string.format("%.1f", loudness), col)
+    ImGuiExt.TableNextColumnEntry(self.ctx, string.format("%.1f", loudness), col)
 end
 
 function GuiSrcValidator:DrawTable_SilenceForward(silenceIn)
     local col <const> = (GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceIn].shouldCheck and silenceIn < self.currentSilenceIn) and
-        self:CurrentColor() or Col.White
-    reaper.ImGui_TableNextColumnEntry(self.ctx, string.format("%.3f s", silenceIn), col)
+        self:CurrentColor() or Color.White
+    ImGuiExt.TableNextColumnEntry(self.ctx, string.format("%.3f s", silenceIn), col)
 end
 
 function GuiSrcValidator:DrawTable_SilenceBackward(silenceOut)
     local col <const> = (GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceOut].shouldCheck and silenceOut < self.currentSilenceOut) and
-        self:CurrentColor() or Col.White
-    reaper.ImGui_TableNextColumnEntry(self.ctx, string.format("%.3f s", silenceOut), col)
+        self:CurrentColor() or Color.White
+    ImGuiExt.TableNextColumnEntry(self.ctx, string.format("%.3f s", silenceOut), col)
 end
 
 function GuiSrcValidator:DrawTable_IsZeroStart(isZeroStart)
-    reaper.ImGui_TableNextColumnEntry(self.ctx, isZeroStart and "o" or "x", Col.White)
+    ImGuiExt.TableNextColumnEntry(self.ctx, isZeroStart and "o" or "x", Color.White)
 end
 
 function GuiSrcValidator:DrawTable_IsZeroEnd(isZeroEnd)
-    reaper.ImGui_TableNextColumnEntry(self.ctx, isZeroEnd and "o" or "x", Col.White)
+    ImGuiExt.TableNextColumnEntry(self.ctx, isZeroEnd and "o" or "x", Color.White)
 end
 
 function GuiSrcValidator:DrawTable_HasRegion(hasRegion)
-    reaper.ImGui_TableNextColumnEntry(self.ctx, hasRegion and "o" or "x", Col.White)
+    ImGuiExt.TableNextColumnEntry(self.ctx, hasRegion and "o" or "x", Color.White)
 end
 
 function GuiSrcValidator:DrawTable_IsMono(isMono)
-    reaper.ImGui_TableNextColumnEntry(self.ctx, isMono and "o" or "x", Col.White)
+    ImGuiExt.TableNextColumnEntry(self.ctx, isMono and "o" or "x", Color.White)
 end
 
 function GuiSrcValidator:DrawCheck_FileFormat(offset)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.FileFormat].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "File Format",
+        ImGui.Checkbox(self.ctx, "File Format",
             GuiSrcValidator.Properties[ValidatorProperty.Type.FileFormat].shouldCheck);
-    reaper.ImGui_SameLine(self.ctx, offset);
+    ImGui.SameLine(self.ctx, offset);
     self:FileFormatCombo();
 end
 
 function GuiSrcValidator:FileFormatCombo()
-    if reaper.ImGui_BeginCombo(self.ctx, "##CurFileFormat", self.currentFileFormat) then
+    if ImGui.BeginCombo(self.ctx, "##CurFileFormat", self.currentFileFormat) then
         for _, data in pairs(GuiSrcValidator.AudioFormatSelections) do
-            if reaper.ImGui_Selectable(self.ctx, data.name, data.isSelected) then
+            if ImGui.Selectable(self.ctx, data.name, data.isSelected) then
                 self.currentFileFormat = data.name;
             end
         end
-        reaper.ImGui_EndCombo(self.ctx);
+        ImGui.EndCombo(self.ctx);
     end
 end
 
 function GuiSrcValidator:DrawCheck_ChannelCount(offset)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.Channels].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "Channels",
+        ImGui.Checkbox(self.ctx, "Channels",
             GuiSrcValidator.Properties[ValidatorProperty.Type.Channels].shouldCheck)
 
-    reaper.ImGui_SameLine(self.ctx, offset);
+    ImGui.SameLine(self.ctx, offset);
 
     _, self.currentChannels =
-        reaper.ImGui_InputInt(self.ctx, "##CurChannels", self.currentChannels)
+        ImGui.InputInt(self.ctx, "##CurChannels", self.currentChannels)
 end
 
-function GuiSrcValidator:RelationalCombo(label, relationalSelection, relations)
-    reaper.ImGui_PushItemWidth(self.ctx, self.relationalComboWidth)
-    local ret = relationalSelection
-    if reaper.ImGui_BeginCombo(self.ctx, label, relationalSelection) then
-        for _, type in pairs(relations) do
-            local retval <const>, _ = reaper.ImGui_Selectable(self.ctx, type, false)
+---comment
+---@param label string
+---@param relationSelection relation The current relation
+---@param relationPotential relation[] The list of supported relations
+---@return relation
+function GuiSrcValidator:RelationalCombo(label, relationSelection, relationPotential)
+    ImGui.PushItemWidth(self.ctx, self.relationalComboWidth)
+    local ret = relationSelection
+    if ImGui.BeginCombo(self.ctx, label, relationSelection) then
+        for _, type in pairs(relationPotential) do
+            local retval <const>, _ = ImGui.Selectable(self.ctx, type, false)
             if retval then
                 ret = type
             end
         end
-        reaper.ImGui_EndCombo(self.ctx)
+        ImGui.EndCombo(self.ctx)
     end
-    reaper.ImGui_PopItemWidth(self.ctx)
+    ImGui.PopItemWidth(self.ctx)
     return ret
 end
 
 function GuiSrcValidator:DrawCheck_Length(offsetA, offsetB)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.Length].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "Length",
+        ImGui.Checkbox(self.ctx, "Length",
             GuiSrcValidator.Properties[ValidatorProperty.Type.Length].shouldCheck)
 
-    reaper.ImGui_SameLine(self.ctx, offsetA)
+    ImGui.SameLine(self.ctx, offsetA)
     self.currentLengthRelationCombo =
         self:RelationalCombo("##RelationalLength", self.currentLengthRelationCombo, { "<", ">" });
-    reaper.ImGui_SameLine(self.ctx, offsetB)
+    ImGui.SameLine(self.ctx, offsetB)
 
     _, self.currentLength =
-        reaper.ImGui_InputDouble(self.ctx, "##CurLength", self.currentLength)
+        ImGui.InputDouble(self.ctx, "##CurLength", self.currentLength)
 end
 
 function GuiSrcValidator:DrawCheck_SampleRate(offset)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.SampleRate].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "Sample Rate",
+        ImGui.Checkbox(self.ctx, "Sample Rate",
             GuiSrcValidator.Properties[ValidatorProperty.Type.SampleRate].shouldCheck)
 
-    reaper.ImGui_SameLine(self.ctx, offset)
+    ImGui.SameLine(self.ctx, offset)
 
     _, self.currentSampleRate =
-        reaper.ImGui_InputInt(self.ctx, "##CurSampleRate", self.currentSampleRate)
+        ImGui.InputInt(self.ctx, "##CurSampleRate", self.currentSampleRate)
 end
 
 function GuiSrcValidator:DrawCheck_BitDepth(offset)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.BitDepth].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "Bit Depth",
+        ImGui.Checkbox(self.ctx, "Bit Depth",
             GuiSrcValidator.Properties[ValidatorProperty.Type.BitDepth].shouldCheck)
 
-    reaper.ImGui_SameLine(self.ctx, offset)
+    ImGui.SameLine(self.ctx, offset)
 
     _, self.currentBitDepth =
-        reaper.ImGui_InputInt(self.ctx, "##CurBitDepth", self.currentBitDepth);
+        ImGui.InputInt(self.ctx, "##CurBitDepth", self.currentBitDepth);
 end
 
 function GuiSrcValidator:DrawCheck_Peak(offsetA, offsetB)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.Peak].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "Peak",
+        ImGui.Checkbox(self.ctx, "Peak",
             GuiSrcValidator.Properties[ValidatorProperty.Type.Peak].shouldCheck)
 
-    reaper.ImGui_SameLine(self.ctx, offsetA)
+    ImGui.SameLine(self.ctx, offsetA)
     self.currentPeakRelationCombo =
         self:RelationalCombo("##RelationalPeak", self.currentPeakRelationCombo, { '<', '>' });
-    reaper.ImGui_SameLine(self.ctx, offsetB)
+    ImGui.SameLine(self.ctx, offsetB)
 
     _, self.currentPeak =
-        reaper.ImGui_InputDouble(self.ctx, "##CurPeak", self.currentPeak);
+        ImGui.InputDouble(self.ctx, "##CurPeak", self.currentPeak);
 end
 
 function GuiSrcValidator:DrawCheck_Loudness(offsetA, offsetB)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.Loudness].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "Loudness",
+        ImGui.Checkbox(self.ctx, "Loudness",
             GuiSrcValidator.Properties[ValidatorProperty.Type.Loudness].shouldCheck)
 
-    reaper.ImGui_SameLine(self.ctx, offsetA)
+    ImGui.SameLine(self.ctx, offsetA)
     self.currentLoudnessRelationCombo =
         self:RelationalCombo("##RelationalLoudness", self.currentLoudnessRelationCombo, { '<', '>' });
-    reaper.ImGui_SameLine(self.ctx, offsetB)
+    ImGui.SameLine(self.ctx, offsetB)
 
     _, self.currentLoudness =
-        reaper.ImGui_InputDouble(self.ctx, "##CurLoudness", self.currentLoudness);
+        ImGui.InputDouble(self.ctx, "##CurLoudness", self.currentLoudness);
 end
 
 function GuiSrcValidator:DrawCheck_SilenceForward(offset)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceIn].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "Silence In",
+        ImGui.Checkbox(self.ctx, "Silence In",
             GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceIn].shouldCheck)
 
-    reaper.ImGui_SameLine(self.ctx, offset);
+    ImGui.SameLine(self.ctx, offset);
 
     _, self.currentSilenceIn =
-        reaper.ImGui_InputDouble(self.ctx, "##CurSilenceIn", self.currentSilenceIn);
+        ImGui.InputDouble(self.ctx, "##CurSilenceIn", self.currentSilenceIn);
 end
 
 function GuiSrcValidator:DrawCheck_SilenceBackward(offset)
     _, GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceOut].shouldCheck =
-        reaper.ImGui_Checkbox(self.ctx, "Silence Out",
+        ImGui.Checkbox(self.ctx, "Silence Out",
             GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceOut].shouldCheck)
 
-    reaper.ImGui_SameLine(self.ctx, offset);
+    ImGui.SameLine(self.ctx, offset);
 
     _, self.currentSilenceOut =
-        reaper.ImGui_InputDouble(self.ctx, "##CurSilenceOut", self.currentSilenceOut);
+        ImGui.InputDouble(self.ctx, "##CurSilenceOut", self.currentSilenceOut);
 end
 
 function GuiSrcValidator:OnClose()
-    self.config:Write(self.config.shortTitles, self.isShortTitles)
-    self.config:Write(self.config.threshold, self.threshold)
-    self.config:Write(self.config.radioFlags, self.radioFlags)
-    self.config:Write(self.config.algorithm, self.detectionAlgorithm)
-    self.config:Write(self.config.bufferSize, self.bufferSize)
-    self.config:Write(self.config.rgb, Col.CreateRGBA(self.curR, self.curG, self.curB))
+    self.config:Write(self.cfgInfo.shortTitles, self.isShortTitles)
+    self.config:Write(self.cfgInfo.threshold, self.threshold)
+    self.config:Write(self.cfgInfo.radioFlags, self.radioFlags)
+    self.config:Write(self.cfgInfo.algorithm, self.detectionAlgorithm)
+    self.config:Write(self.cfgInfo.bufferSize, self.bufferSize)
+    self.config:Write(self.cfgInfo.rgb, Color.CreateRGBA(self.curR, self.curG, self.curB))
 
-    self.config:Write(self.config.fileFormat .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.fileFormat .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.FileFormat].shouldCheck)
-    self.config:Write(self.config.fileFormat, self.currentFileFormat)
+    self.config:Write(self.cfgInfo.fileFormat, self.currentFileFormat)
 
-    self.config:Write(self.config.channels .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.channels .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.Channels].shouldCheck)
-    self.config:Write(self.config.channels, self.currentChannels)
+    self.config:Write(self.cfgInfo.channels, self.currentChannels)
 
-    self.config:Write(self.config.length .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.length .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.Length].shouldCheck)
-    self.config:Write(self.config.length, self.currentLength)
-    self.config:Write(self.config.length .. self.config.conditional, self.currentLengthRelationCombo)
+    self.config:Write(self.cfgInfo.length, self.currentLength)
+    self.config:Write(self.cfgInfo.length .. self.cfgInfo.conditional, self.currentLengthRelationCombo)
 
-    self.config:Write(self.config.sampleRate .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.sampleRate .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.SampleRate].shouldCheck)
-    self.config:Write(self.config.sampleRate, self.currentSampleRate)
+    self.config:Write(self.cfgInfo.sampleRate, self.currentSampleRate)
 
-    self.config:Write(self.config.bitDepth .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.bitDepth .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.BitDepth].shouldCheck)
-    self.config:Write(self.config.bitDepth, self.currentBitDepth)
+    self.config:Write(self.cfgInfo.bitDepth, self.currentBitDepth)
 
-    self.config:Write(self.config.peak .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.peak .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.Peak].shouldCheck)
-    self.config:Write(self.config.peak, self.currentPeak)
-    self.config:Write(self.config.peak .. self.config.conditional, self.currentPeakRelationCombo)
+    self.config:Write(self.cfgInfo.peak, self.currentPeak)
+    self.config:Write(self.cfgInfo.peak .. self.cfgInfo.conditional, self.currentPeakRelationCombo)
 
-    self.config:Write(self.config.loudness .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.loudness .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.Loudness].shouldCheck)
-    self.config:Write(self.config.loudness, self.currentLoudness)
-    self.config:Write(self.config.loudness .. self.config.conditional, self.currentLoudnessRelationCombo)
+    self.config:Write(self.cfgInfo.loudness, self.currentLoudness)
+    self.config:Write(self.cfgInfo.loudness .. self.cfgInfo.conditional, self.currentLoudnessRelationCombo)
 
-    self.config:Write(self.config.silenceIn .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.silenceIn .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceIn].shouldCheck)
-    self.config:Write(self.config.silenceIn, self.currentSilenceIn)
+    self.config:Write(self.cfgInfo.silenceIn, self.currentSilenceIn)
 
-    self.config:Write(self.config.silenceOut .. self.config.shouldCheck,
+    self.config:Write(self.cfgInfo.silenceOut .. self.cfgInfo.shouldCheck,
         GuiSrcValidator.Properties[ValidatorProperty.Type.SilenceOut].shouldCheck)
-    self.config:Write(self.config.silenceOut, self.currentSilenceOut)
+    self.config:Write(self.cfgInfo.silenceOut, self.currentSilenceOut)
 end
 
 function GuiSrcValidator:CopyToClipboard()
-    local output = {}
+    local output <const> = {}
     for _, property in pairs(GuiSrcValidator.Properties) do
         table.insert(output, property.title .. "\t")
     end
@@ -782,19 +812,18 @@ function GuiSrcValidator:CopyToClipboard()
         outputString = outputString .. value
     end
 
-    reaper.ImGui_SetClipboardText(self.ctx, outputString)
+    ImGui.SetClipboardText(self.ctx, outputString)
 end
 
 function GuiSrcValidator:PrintToCSV()
-    local defaultPath <const> = self.config:Read(self.config.csvPath) or FileSys.Path.Default()
+    local defaultPath <const> = self.config:ReadString(self.cfgInfo.csvPath) or FileSys.Path.Default()
     local extensionList <const> = "CSV (.csv)\0*.csv\0\0"
     local windowTitle <const> = "Save CSV to location"
 
     local directory <const>, _, _ = FileSys.Path.Parse(defaultPath)
     local path <const> = FileSys.SaveDialog(windowTitle, directory, self:CreateCSVFileName(), extensionList)
 
-    ---@diagnostic disable-next-line: param-type-mismatch
-    if GUtil.IsNilOrEmpty(path) then return end
+    if Str.IsNilOrEmpty(path) then return end
 
     local file <close> = File(path, File.Mode.Write)
 
@@ -812,27 +841,27 @@ function GuiSrcValidator:PrintToCSV()
         file:Write("\n")
     end
 
-    self.config:Write(self.config.csvPath, path)
+    self.config:Write(self.cfgInfo.csvPath, path)
 end
 
 GuiSrcValidator.TableFlag = {
-    { "Resizable",            reaper.ImGui_TableFlags_Resizable() },
-    { "Fixed Fit",            reaper.ImGui_TableFlags_SizingFixedFit() },
-    { "Stretch Proportional", reaper.ImGui_TableFlags_SizingStretchProp() }
+    { "Resizable",            ImGui.TableFlags_Resizable },
+    { "Fixed Fit",            ImGui.TableFlags_SizingFixedFit },
+    { "Stretch Proportional", ImGui.TableFlags_SizingStretchProp }
 }
 
 function GuiSrcValidator:Menu_TableView()
-    if reaper.ImGui_BeginMenu(self.ctx, "Layout") then
+    if ImGui.BeginMenu(self.ctx, "Layout") then
         for index, flag in ipairs(GuiSrcValidator.TableFlag) do
             self:ImGui_RadioTableFlags(index, flag[1], flag[2])
         end
 
-        reaper.ImGui_EndMenu(self.ctx);
+        ImGui.EndMenu(self.ctx);
     end
 end
 
 function GuiSrcValidator:ImGui_RadioTableFlags(flagNumber, name, flag)
-    if reaper.ImGui_RadioButton(self.ctx, name, self.radioFlags == flagNumber) then
+    if ImGui.RadioButton(self.ctx, name, self.radioFlags == flagNumber) then
         if self.radioFlags ~= flagNumber then
             self.radioFlags = flagNumber
             self.tableFlags = flag
@@ -841,40 +870,38 @@ function GuiSrcValidator:ImGui_RadioTableFlags(flagNumber, name, flag)
 end
 
 function GuiSrcValidator:Menu_Detection()
-    if reaper.ImGui_BeginMenu(self.ctx, "Detection") then
-        if reaper.ImGui_RadioButton(self.ctx, "Peak", self.detectionAlgorithm == SilenceDetectionAlgorithm.Peak) then
-            self.detectionAlgorithm = SilenceDetectionAlgorithm.Peak;
+    if ImGui.BeginMenu(self.ctx, "Detection") then
+        if ImGui.RadioButton(self.ctx, "Peak", self.detectionAlgorithm == 0) then
+            self.detectionAlgorithm = 0;
         end
-        if reaper.ImGui_RadioButton(self.ctx, "RMS", self.detectionAlgorithm == SilenceDetectionAlgorithm.RMS) then
-            self.detectionAlgorithm = SilenceDetectionAlgorithm.RMS;
+        if ImGui.RadioButton(self.ctx, "RMS", self.detectionAlgorithm == 1) then
+            self.detectionAlgorithm = 1;
         end
 
-        local speed <const> = 1.0;
-        local min <const> = 1;
-        local max <const> = 8192;
+        local speed <const> = 1.0
+        local min <const> = 1
+        local max <const> = 8192
 
-        _, self.bufferSize = reaper.ImGui_DragInt(self.ctx, "Buffer Size", self.bufferSize, speed, min, max);
-        _, self.threshold = reaper.ImGui_SliderDouble(self.ctx, "Silence Threshold", self.threshold, -144.0, 0, "%.1f");
+        _, self.bufferSize = ImGui.DragInt(self.ctx, "Buffer Size", self.bufferSize, speed, min, max)
+        _, self.threshold = ImGui.SliderDouble(self.ctx, "Silence Threshold", self.threshold, -144.0, 0, "%.1f")
 
-        reaper.ImGui_EndMenu(self.ctx);
+        ImGui.EndMenu(self.ctx);
     end
 end
 
 function GuiSrcValidator:Menu_ColorSelector()
-    if reaper.ImGui_BeginMenu(self.ctx, "Validation Color") then
-        local min <const> = 0;
-        local max <const> = 255;
-        local speed <const> = 1;
-        local flag <const> = reaper.ImGui_SliderFlags_AlwaysClamp();
+    if ImGui.BeginMenu(self.ctx, "Validation Color") then
+        local min <const> = 0
+        local max <const> = 255
+        local speed <const> = 1
+        local flag <const> = ImGui.SliderFlags_AlwaysClamp
 
-        _, self.curR = reaper.ImGui_DragInt(self.ctx, "R##ColSelRed", self.curR, speed, min, max, nil, flag);
-        _, self.curG = reaper.ImGui_DragInt(self.ctx, "G##ColSelGre", self.curG, speed, min, max, nil, flag);
-        _, self.curB = reaper.ImGui_DragInt(self.ctx, "B##ColSelBlu", self.curB, speed, min, max, nil, flag);
+        _, self.curR = ImGui.DragInt(self.ctx, "R##ColSelRed", self.curR, speed, min, max, nil, flag)
+        _, self.curG = ImGui.DragInt(self.ctx, "G##ColSelGre", self.curG, speed, min, max, nil, flag)
+        _, self.curB = ImGui.DragInt(self.ctx, "B##ColSelBlu", self.curB, speed, min, max, nil, flag)
 
-        CurColor = Col.CreateRGBA(self.curR, self.curG, self.curB);
+        CurColor = Color.CreateRGBA(self.curR, self.curG, self.curB)
 
-        reaper.ImGui_EndMenu(self.ctx);
+        ImGui.EndMenu(self.ctx)
     end
 end
-
---#endregion GuiSrcValidator

@@ -1,21 +1,33 @@
 -- @description Batch replace source
 -- @author guonaudio
--- @version 1.0b
+-- @version 1.1b
 -- @changelog
---   Pre-release
+--   Refactor to make better use of Lua Language Server
 -- @about
 --   Batch replaces the source for the selected item's active take
 --   Search and replace is run recursively for a given path
 
-local scriptPath <const> = debug.getinfo(1).source
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/reaper_lib.lua")
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/gui_lib.lua")
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/utils_lib.lua")
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-local BatchReplacer <const> = GuiBase:extend();
+require('lua.gutil_classic')
+require('lua.gutil_color')
+require('lua.gutil_filesystem')
+require('reaper.gutil_config')
+require('reaper.gutil_debug')
+require('reaper.gutil_gui')
+require('reaper.gutil_item')
+require('reaper.gutil_os')
+require('reaper.gutil_project')
+require('reaper.gutil_source')
+require('reaper.gutil_take')
+
+---@class BatchReplacer : GuiBase
+---@operator call: BatchReplacer
+BatchReplacer = GuiBase:extend()
 
 function BatchReplacer:new(name, undoText)
-    BatchReplacer.super.new(self, name, undoText)
+    BatchReplacer.super:new(name, undoText)
 
     self.config = Config(FileSys.GetRawName(name))
     self.pathKey = "rootPath"
@@ -23,76 +35,68 @@ function BatchReplacer:new(name, undoText)
     self.replaceKey = "replace"
     self.shouldReplaceInNameKey = "shouldReplaceInName"
 
-    self.pathColor = Col.White
+    self.pathColor = Color.White
 
-    local rv
-    rv = self.config:Read(self.pathKey)
-    self.path = rv or ""
-
-    rv = self.config:Read(self.searchKey)
-    self.search = rv or ""
-
-    rv = self.config:Read(self.replaceKey)
-    self.replace = rv or ""
-
-    rv = self.config:Read(self.shouldReplaceInNameKey)
-    self.shouldReplaceInName = rv or true
+    self.path = self.config:ReadString(self.pathKey) or ""
+    self.search = self.config:ReadString(self.searchKey) or ""
+    self.replace = self.config:ReadString(self.replaceKey) or ""
+    self.shouldReplaceInName = self.config:ReadBool(self.shouldReplaceInNameKey) or true
 
     self.windowWidth = 400
     self.windowHeight = 298
 end
 
 function BatchReplacer:GetFirstSelectedItemActiveTakeName()
-    if reaper.CountSelectedMediaItems(THIS_PROJECT) < 1 then return "" end
-    local itemPtr <const> = reaper.GetSelectedMediaItem(THIS_PROJECT, 0)
-    if itemPtr == nil then return "" end
-    local takePtr <const> = Item(itemPtr):GetActiveTakePtr()
-    if takePtr == nil then return "" end
-    return tostring(Take(takePtr))
+    local items <const> = Project(THIS_PROJECT):GetSelectedItems()
+    if #items == 0 then return "" end
+
+    local take <const> = items[1]:GetActiveTake()
+    if not take:IsValid() then return "" end
+
+    local source <const> = take:GetSource()
+    if not source:IsValid() then return "" end
+
+    return source:GetFileName()
 end
 
 function BatchReplacer:ReplaceItemSource()
-    local items <const> = Items(FillType.Selected)
-    for _, item in pairs(items.array) do
-        local takePtr <const> = item:GetActiveTakePtr()
-
-        if takePtr == nil then goto continue end -- skip blank item
+    local items <const> = Project(THIS_PROJECT):GetSelectedItems()
+    for _, item in ipairs(items) do
+        local take <const> = item:GetActiveTake()
+        if not take:IsValid() then goto continue end -- skip blank item
 
         local rv <const>, _, start <const>, length <const>, fade <const>, reverse <const> =
-            reaper.BR_GetMediaSourceProperties(takePtr)
+            reaper.BR_GetMediaSourceProperties(take.id)
 
         if rv then
             -- if "section" is enabled, it causes source get name to fail
-            reaper.BR_SetMediaSourceProperties(takePtr, false, start, length, fade, reverse)
+            reaper.BR_SetMediaSourceProperties(take.id, false, start, length, fade, reverse)
         else
-            Debug:Log("Failed to GetMediaSourceProperties for %s", item:GetGuid())
+            Debug.Log("Failed to GetMediaSourceProperties for %s", item.id)
             goto continue
         end
 
-        local take <const> = Take(takePtr)
-        local sourcePtr <const> = take:GetSourcePtr()
-
-        if sourcePtr == nil then goto continue end -- skip invalid source
-        local source <const> = Source(sourcePtr)
+        local source <const> = take:GetSource()
+        if not source:IsValid() then goto continue end -- skip invalid source
 
         local sourceName <const> = source:GetFileName()
-        if GUtil.IsNilOrEmpty(sourceName) then -- strange bug where source is returning nil
-            Debug:Log("Cannot get active take source name for %s", item)
+        if Str.IsNilOrEmpty(sourceName) then -- strange bug where source is returning nil
+            Debug.Log("Cannot get active take source name for %s", item)
             goto continue
         end
 
-        local replaceString <const> = string.gsub(sourceName, self.search, self.replace)
+        local replaceString <const> = sourceName:gsub(self.search, self.replace)
 
-        local newPath <const> = reaper.GU_Filesystem_FindFileInPath(self.path, replaceString)
+        local newPath <const> = FileSys.Path.Find(self.path, replaceString)
 
-        if GUtil.IsNilOrEmpty(newPath) then goto continue end -- not found
+        if Str.IsNilOrEmpty(newPath) then goto continue end -- not found
 
         take:SetAudioSource(newPath)
         if self.shouldReplaceInName then
-            take:SetName(replaceString)
+            take:SetString("P_NAME", replaceString)
         end
 
-        reaper.UpdateItemInProject(item.ptr)
+        item:UpdateInProject()
 
         ::continue::
     end
@@ -113,62 +117,62 @@ function BatchReplacer:GetPath()
 end
 
 function BatchReplacer:Frame()
-    local vp <const> = reaper.ImGui_GetWindowViewport(self.ctx)
-    local windowWidth <const>, _ = reaper.ImGui_Viewport_GetSize(vp)
+    local windowWidth <const>, _ = ImGui.Viewport_GetSize(ImGui.GetWindowViewport(self.ctx))
     local scaledWindowWidth <const> = windowWidth * 0.65
 
     local rv
-    rv, self.path = reaper.ImGui_InputText(self.ctx, "Path", self.path, reaper.ImGui_InputTextFlags_None())
-    if rv then
-        self.pathColor = FileSys.Path.Exists(self.path) and Col.White or Col.Red
-    end
-    if reaper.ImGui_Button(self.ctx, "GetPath", scaledWindowWidth) then
+    rv, self.path = ImGui.InputText(self.ctx, "Path", self.path, ImGui.InputTextFlags_None)
+    if ImGui.Button(self.ctx, "GetPath", scaledWindowWidth) then
         self:GetPath()
     end
-    _, self.search = reaper.ImGui_InputText(self.ctx, "Search", self.search, reaper.ImGui_InputTextFlags_None())
-    _, self.replace = reaper.ImGui_InputText(self.ctx, "Replace", self.replace, reaper.ImGui_InputTextFlags_None())
+    rv, self.search = ImGui.InputText(self.ctx, "Search", self.search, ImGui.InputTextFlags_None)
+    rv, self.replace = ImGui.InputText(self.ctx, "Replace", self.replace, ImGui.InputTextFlags_None)
 
-    if reaper.ImGui_Button(self.ctx, "Swap", scaledWindowWidth) then
+    self.pathColor = FileSys.Path.Find(self.path, self.replace) ~= "" and Color.White or Color.Red
+
+    if ImGui.Button(self.ctx, "Swap", scaledWindowWidth) then
         local temp <const> = self.search
         self.search = self.replace
         self.replace = temp
     end
 
-    _, self.shouldReplaceInName = reaper.ImGui_Checkbox(self.ctx, "Should Replace In Name", self.shouldReplaceInName)
+    _, self.shouldReplaceInName = ImGui.Checkbox(self.ctx, "Should Replace In Name", self.shouldReplaceInName)
 
-    reaper.ImGui_Separator(self.ctx)
+    ImGui.Separator(self.ctx)
 
-    reaper.ImGui_Text(self.ctx, "Path To Search:")
-    reaper.ImGui_PushStyleColor(self.ctx, 0, self.pathColor)
-    reaper.ImGui_Indent(self.ctx)
-    reaper.ImGui_TextWrapped(self.ctx, self.path)
-    reaper.ImGui_Unindent(self.ctx)
-    reaper.ImGui_PopStyleColor(self.ctx, 1)
+    ImGui.Text(self.ctx, "Path To Search:")
+    ImGui.PushStyleColor(self.ctx, 0, self.pathColor)
+    ImGui.Indent(self.ctx)
+    ImGui.TextWrapped(self.ctx, self.path .. "\\" .. self.replace)
+    ImGui.Unindent(self.ctx)
+    ImGui.PopStyleColor(self.ctx, 1)
 
     local takeName <const> = self:GetFirstSelectedItemActiveTakeName()
     local replacementName <const> = takeName:gsub(self.search, self.replace)
-    reaper.ImGui_Text(self.ctx, "First selected item:")
-    reaper.ImGui_Indent(self.ctx)
-    reaper.ImGui_Text(self.ctx, takeName)
-    reaper.ImGui_Unindent(self.ctx)
+    ImGui.Text(self.ctx, "First selected item:")
+    ImGui.Indent(self.ctx)
+    ImGui.Text(self.ctx, takeName)
+    ImGui.Unindent(self.ctx)
 
-    reaper.ImGui_Text(self.ctx, "Should be replaced by:")
-    reaper.ImGui_Indent(self.ctx)
-    reaper.ImGui_Text(self.ctx, replacementName)
-    reaper.ImGui_Unindent(self.ctx)
+    ImGui.Text(self.ctx, "Should be replaced by:")
+    ImGui.Indent(self.ctx)
+    ImGui.Text(self.ctx, replacementName)
+    ImGui.Unindent(self.ctx)
 
-    if reaper.ImGui_Button(self.ctx, "Activate", scaledWindowWidth) or reaper.ImGui_IsEnterKeyPressed(self.ctx) then
-        if FileSys.Path.Exists(self.path) then
+    if ImGui.Button(self.ctx, "Activate", scaledWindowWidth) or ImGuiExt.IsEnterKeyPressed(self.ctx) then
+        if not FileSys.Path.Exists(self.path) then
+            Dialog.MB("Path is invalid. Please provide a valid path before proceeding", "Warning", 0)
+        else
             self:Begin()
             self:ReplaceItemSource()
             self:SaveConfigFile()
-            self:Complete(reaper.UndoState.Items)
-        else
-            reaper.MB("Path is invalid. Please provide a valid path before proceeding", "Warning",
-                MessageBoxType.OK)
+            self:Complete(4)
+            self:Close()
         end
     end
 end
+
+local scriptPath <const> = debug.getinfo(1).source
 
 local _, file <const>, _ = FileSys.Path.Parse(scriptPath)
 

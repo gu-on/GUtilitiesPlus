@@ -1,15 +1,23 @@
 -- @description Move selected items to track with same name
 -- @author guonaudio
--- @version 1.0
+-- @version 1.1
 -- @changelog
---   Initial release
+--   Refactor to make better use of Lua Language Server
 -- @about
 --   Move items to first found track with the same name
 
-local scriptPath <const> = debug.getinfo(1).source
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/reaper_lib.lua")
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/utils_lib.lua")
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
+require('lua.gutil_classic')
+require('reaper.gutil_action')
+require('reaper.gutil_item')
+require('reaper.gutil_project')
+require('reaper.gutil_take')
+require('reaper.gutil_track')
+
+---@class ItemToTrackMover : Action
+---@operator call : ItemToTrackMover
 ItemToTrackMover = Action:extend()
 
 function ItemToTrackMover:new(undoText)
@@ -17,17 +25,17 @@ function ItemToTrackMover:new(undoText)
 end
 
 function ItemToTrackMover:MoveItems()
-    local items <const> = Items(FillType.Selected)
-    local tracks <const> = Tracks(FillType.All)
+    local project <const> = Project(THIS_PROJECT)
+    local items <const> = project:GetSelectedItems()
+    local tracks <const> = project:GetAllTracks()
 
-    for _, item in pairs(items.array) do
-        local takePtr <const> = item:GetActiveTakePtr()
-        if takePtr == nil then goto continue end
+    for _, item in pairs(items) do
+        local take <const> = item:GetActiveTake()
+        if take == nil then goto continue end
 
-        local take <const> = Take(takePtr)
-        for _, track in pairs(tracks.array) do
-            if string.find(tostring(track), tostring(take)) ~= nil then
-                item:SetTrack(track.ptr)
+        for _, track in pairs(tracks) do
+            if string.find(track:GetString("P_NAME"), take:GetString("P_NAME")) ~= nil then
+                item:SetTrack(track)
             end
         end
 
@@ -38,7 +46,7 @@ end
 function ItemToTrackMover:Process()
     self:Begin()
     self:MoveItems()
-    self:Complete(reaper.UndoState.Items)
+    self:Complete(4)
 end
 
 ItemToTrackMover("Move items to track of same name"):Process()

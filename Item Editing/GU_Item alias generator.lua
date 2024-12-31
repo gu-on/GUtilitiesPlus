@@ -1,76 +1,87 @@
 -- @description Item alias generator
 -- @author guonaudio
--- @version 1.0
+-- @version 1.1
 -- @changelog
---   Initial release
+--   Refactor to make better use of Lua Language Server
 -- @about
 --   Generates empty items in parent track based on all overlapping items in child tracks
 
-local scriptPath = debug.getinfo(1).source
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/reaper_lib.lua")
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/utils_lib.lua")
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-local ItemAliasGen <const> = Action:extend()
+require('lua.gutil_classic')
+require('lua.gutil_table')
+require('reaper.gutil_action')
+require('reaper.gutil_item')
+require('reaper.gutil_project')
+require('reaper.gutil_take')
+require('reaper.gutil_track')
 
+---@class (exact) TimePair
+---@field Start number
+---@field End number
+
+---@class ItemAliasGen : Object, Action
+---@operator call: ItemAliasGen
+ItemAliasGen = Object:extend()
+ItemAliasGen:implement(Action)
+
+---@param undoText string
 function ItemAliasGen:new(undoText)
     self.undoText = undoText
-    self.primoTracks = {} -- map where key = MediaTrack, and value = table of item start/end time pairs
+    self.primoTracks = {} ---@type {[MediaTrack]: TimePair}
 end
 
-function ItemAliasGen:AddToPrimoTracks(ptr, item)
-    self.primoTracks[ptr] = self.primoTracks[ptr] or {} -- if doesn't exist, create new
-    table.insert(self.primoTracks[ptr], { item:GetStart(), item:GetEnd() })
+---@param track Track
+---@param item Item
+function ItemAliasGen:AddToPrimoTracks(track, item)
+    self.primoTracks[track.id] = self.primoTracks[track.id] or {} -- if doesn't exist, create new
+    table.insert(self.primoTracks[track.id], { Start = item:GetStart(), End = item:GetEnd(), fluven = 10 })
 end
 
 function ItemAliasGen:FillData()
-    local items = Items(FillType.Selected)
-
-    for _, item in pairs(items.array) do
-        local trackPtr = item:GetTrackPtr()
-        assert(trackPtr, "MediaItem must exist on a MediaTrack")
-
-        local track = Track(trackPtr)
-
-        if not track:IsRoot() then -- only process items on child tracks
-            self:AddToPrimoTracks(track:GetPrimogenitorPtr(), item)
+    local items <const> = Project(THIS_PROJECT):GetSelectedItems()
+    for _, item in pairs(items) do
+        local track <const> = item:GetTrack()
+        if track:GetDepth() ~= 0 then -- only process items on child tracks
+            self:AddToPrimoTracks(track:GetPrimogenitor(), item)
         end
     end
 end
 
-function ItemAliasGen:MergeOverlapping(data)
-    table.sort(data, function (a, b) return a[1] < b[1] end)
+---@param timePairs TimePair[]
+function ItemAliasGen:MergeOverlapping(timePairs)
+    table.sort(timePairs, function (A, B) return A.Start < B.Start end) -- sort TimePairs by start
 
-    local merged = {}
-    local interval = data[1]
-    for i = 2, #data do
-        local newInterval = data[i]
+    local mergedTimes <const> = {} ---@type TimePair[]
+    local interval = timePairs[1] ---@type TimePair # Assign interval to first pair
+    for i = 2, #timePairs do
+        local newInterval <const> = timePairs[i]
 
-        if newInterval[1] <= interval[2] then
-            interval[2] = math.max(interval[2], newInterval[2])
+        if newInterval.Start <= interval.End then
+            interval.End = math.max(interval.End, newInterval.End)
         else
-            table.insert(merged, interval)
+            table.insert(mergedTimes, interval)
             interval = newInterval
         end
     end
 
-    table.insert(merged, interval) -- bookend final interval
+    table.insert(mergedTimes, interval) -- bookend final interval
 
-    return merged
+    return mergedTimes
 end
 
 function ItemAliasGen:ConsolidateData()
-    for ptr, data in pairs(self.primoTracks) do
-        self.primoTracks[ptr] = self:MergeOverlapping(data)
+    for trackId, timePairs in pairs(self.primoTracks) do
+        self.primoTracks[trackId] = self:MergeOverlapping(timePairs)
     end
 end
 
 function ItemAliasGen:CreateBlankItems()
-    for ptr, data in pairs(self.primoTracks) do
-        assert(ptr, "MediaTrack should still be valid")
-
-        local track = Track(ptr)
-        for _, itemInfo in ipairs(data) do
-            track:CreateBlankItem("", itemInfo[1], itemInfo[2] - itemInfo[1])
+    for trackId, timePairs in pairs(self.primoTracks) do
+        for _, timePair in pairs(timePairs) do
+            local track <const> = Track(trackId)
+            track:CreateBlankItem("", timePair.Start, timePair.End - timePair.Start)
         end
     end
 end
@@ -82,7 +93,9 @@ function ItemAliasGen:Process()
     self:ConsolidateData()
     self:CreateBlankItems()
 
-    self:Complete(reaper.UndoState.Items)
+    self:Complete(4)
 end
 
-ItemAliasGen("Generate item aliases"):Process()
+local main <const> = ItemAliasGen("Generate item aliases")
+
+main:Process()

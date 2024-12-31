@@ -1,4 +1,5 @@
 -- @noindex
+
 -- @description classic
 -- @about
 --   Copyright (c) 2014, rxi
@@ -6,20 +7,13 @@
 --   This module is free software; you can redistribute it and/or modify it under
 --   the terms of the MIT license. See LICENSE for details.
 
-local _, file <const>, _ = debug.getinfo(1).source:match("(.-)([^\\]-([^\\%.]+))$")
-
-if _INCLUDED[file] then
-    return
-end
-
-_INCLUDED[file] = true
-
-
+---@class Object
+---@field super Object
 Object = {}
 Object.__index = Object
 
-
-function Object:new()
+function Object:new(...)
+    return self
 end
 
 function Object:extend()

@@ -1,42 +1,52 @@
 -- @description Set item length after snap offset
 -- @author guonaudio
--- @version 1.0
+-- @version 1.1
 -- @changelog
---   Initial release
+--   Refactor to make better use of Lua Language Server
 -- @about
 --   Sets the length of the item to the right of its snap offset (in seconds)
 
-local scriptPath <const> = debug.getinfo(1).source
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/reaper_lib.lua")
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/gui_lib.lua")
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/utils_lib.lua")
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
+require('lua.gutil_filesystem')
+require('reaper.gutil_config')
+require('reaper.gutil_gui')
+require('reaper.gutil_item')
+require('reaper.gutil_os')
+require('reaper.gutil_project')
+
+---@class AdjusterAfter : GuiBase
+---@operator call : AdjusterAfter
 AdjusterAfter = GuiBase:extend()
 
+---@param name string
+---@param undoText string
 function AdjusterAfter:new(name, undoText)
     AdjusterAfter.super.new(self, name, undoText)
 
-    self.windowFlags = self.windowFlags + reaper.ImGui_WindowFlags_AlwaysAutoResize()
+    self.windowFlags = self.windowFlags + ImGui.WindowFlags_AlwaysAutoResize
 
     self.configKey = "timeAfterOffset"
     self.config = Config(FileSys.GetRawName(name))
 
-    local rv <const> = self.config:Read(self.configKey)
-    self.timeAfterOffset = tonumber(rv) or 0
+    self.timeAfterOffset = self.config:ReadNumber(self.configKey) or 0
 end
 
+---@param item Item
 function AdjusterAfter:AddItemOffset(item)
-    local snapOffset <const> = item:GetSnapOffset()
+    local snapOffset <const> = item:GetValue("D_SNAPOFFSET")
     if snapOffset <= 0 then
-        item:SetLength(self.timeAfterOffset)
+        item:SetValue("D_LENGTH", self.timeAfterOffset)
     else
-        item:SetLength(self.timeAfterOffset + snapOffset)
+        item:SetValue("D_LENGTH", self.timeAfterOffset + snapOffset)
     end
 end
 
 function AdjusterAfter:ProcessItems()
-    local items <const> = Items(FillType.Selected)
-    for _, item in pairs(items.array) do
+    local project <const> = Project(THIS_PROJECT)
+    local items <const> = project:GetSelectedItems()
+    for _, item in pairs(items) do
         self:AddItemOffset(item)
     end
 end
@@ -45,24 +55,25 @@ function AdjusterAfter:ApplyOffset()
     self:Begin()
     self:ProcessItems()
     self.config:Write(self.configKey, tostring(self.timeAfterOffset))
-    self:Complete(reaper.UndoState.Items)
+    self:Complete(4)
 end
 
 function AdjusterAfter:Frame()
     if self.frameCounter == 1 then
-        reaper.ImGui_SetKeyboardFocusHere(self.ctx)
+        ImGui.SetKeyboardFocusHere(self.ctx)
     end
 
-    local _, v = reaper.ImGui_InputDouble(self.ctx, "Seconds:", self.timeAfterOffset)
-    self.timeAfterOffset = v
+    self.timeAfterOffset = select(2, ImGui.InputDouble(self.ctx, "Seconds:", self.timeAfterOffset))
 
-    if reaper.ImGui_Button(self.ctx, "Apply") or reaper.ImGui_IsEnterKeyPressed(self.ctx) then
+    if ImGui.Button(self.ctx, "Apply") or ImGuiExt.IsEnterKeyPressed(self.ctx) then
         self:ApplyOffset()
     end
 end
 
-local _, file <const>, _ = FileSys.Path.Parse(scriptPath)
+local scriptPath <const> = debug.getinfo(1).source
 
-local gui <const> = AdjusterAfter(file, "Set item length after snap offset")
+local _, filename <const>, _ = FileSys.Path.Parse(scriptPath)
 
-reaper.defer(function() gui:Loop() end)
+local gui <const> = AdjusterAfter(filename, "Set item length after snap offset")
+
+reaper.defer(function () gui:Loop() end)

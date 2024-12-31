@@ -1,22 +1,33 @@
 -- @description Item fader
 -- @author guonaudio
--- @version 1.1
+-- @version 1.2
 -- @changelog
---   Added scroll wheel functionality to inputs
+--   Refactor to make better use of Lua Language Server
 -- @about
 --   Batch fades items based on percentage of length.
 
-local scriptPath <const> = debug.getinfo(1).source
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/reaper_lib.lua")
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/gui_lib.lua")
-dofile(scriptPath:match("@?(.*[\\|/])") .. "../Include/utils_lib.lua")
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
---#region FadeInfo
+require('gutil_global')
+require('lua.gutil_classic')
+require('lua.gutil_curve')
+require('lua.gutil_filesystem')
+require('reaper.gutil_config')
+require('reaper.gutil_gui')
+require('reaper.gutil_item')
+require('reaper.gutil_os')
+require('reaper.gutil_project')
 
+---@class FadeInfo : Object
+---@operator call: FadeInfo
 FadeInfo = Object:extend()
-FadeInfo.TIMER_MAX = 1
+FadeInfo.TimerMax = 1
 
-function FadeInfo:new(scale, direction, fadeShape)
+---@param scale number
+---@param direction FadeDirection
+---@param shape FadeShapeIndex
+function FadeInfo:new(scale, direction, shape)
     -- animation
     self.timer = 0
     self.isMoving = false
@@ -32,47 +43,45 @@ function FadeInfo:new(scale, direction, fadeShape)
 
     -- preview
     self.curve = {}
-    self.curve.current = self:GetCurveArray(fadeShape)
+    self.curve.current = self.dir == 0 and self:GetCurveArrayIn(shape) or self:GetCurveArrayOut(shape)
     self.curve.previous = {}
     self.curve.next = {}
 
+    local c <const> = Curve() ---@type Curve
+
     -- combo (static)
-    self.linear =
-        reaper.new_array(self.dir == FadeDirection.In and Curve():PlotLinear() or Curve():PlotLinearR())
-    self.fastStart =
-        reaper.new_array(self.dir == FadeDirection.In and Curve():PlotFastStart(2.0) or Curve():PlotFastStartR(2.0))
-    self.fastEnd =
-        reaper.new_array(self.dir == FadeDirection.In and Curve():PlotFastEnd(2.0) or Curve():PlotFastEndR(2.0))
-    self.fastStartSteep =
-        reaper.new_array(self.dir == FadeDirection.In and Curve():PlotFastStart(4.0) or Curve():PlotFastStartR(4.0))
-    self.fastEndSteep =
-        reaper.new_array(self.dir == FadeDirection.In and Curve():PlotFastEnd(4.0) or Curve():PlotFastEndR(4.0))
-    self.slowStartEnd =
-        reaper.new_array(self.dir == FadeDirection.In and Curve():PlotSlowStartEnd(2.5) or Curve():PlotSlowStartEndR(2.5))
-    self.slowStartEndSteep =
-        reaper.new_array(self.dir == FadeDirection.In and Curve():PlotSlowStartEnd(7.0) or Curve():PlotSlowStartEndR(7.0))
+    self.linear = reaper.new_array(self.dir == 0 and c:PlotLinear() or c:PlotLinearR())
+    self.fastStart = reaper.new_array(self.dir == 0 and c:PlotFastStart(2.0) or c:PlotFastStartR(2.0))
+    self.fastEnd = reaper.new_array(self.dir == 0 and c:PlotFastEnd(2.0) or c:PlotFastEndR(2.0))
+    self.fastStartSteep = reaper.new_array(self.dir == 0 and c:PlotFastStart(4.0) or c:PlotFastStartR(4.0))
+    self.fastEndSteep = reaper.new_array(self.dir == 0 and c:PlotFastEnd(4.0) or c:PlotFastEndR(4.0))
+    self.slowStartEnd = reaper.new_array(self.dir == 0 and c:PlotSlowStartEnd(2.5) or c:PlotSlowStartEndR(2.5))
+    self.slowStartEndSteep = reaper.new_array(self.dir == 0 and c:PlotSlowStartEnd(7.0) or c:PlotSlowStartEndR(7.0))
 end
 
+---@param ctx ImGui_Context
 function FadeInfo:Tick(ctx)
-    if self.timer > FadeInfo.TIMER_MAX then
+    if self.timer > FadeInfo.TimerMax then
         self.isMoving = false
         self.timer = 0
     end
 
     if self.isMoving then
-        self.timer = self.timer + reaper.ImGui_GetDeltaTime(ctx)
+        self.timer = self.timer + ImGui.GetDeltaTime(ctx)
         self:AnimateTransition()
     end
 end
 
+---@param ctx ImGui_Context
+---@param arr reaper.array
 function FadeInfo:DrawItemPlot(ctx, arr)
-    reaper.ImGui_TableNextRow(ctx)
-    reaper.ImGui_TableNextColumn(ctx)
-    reaper.ImGui_PlotLines(ctx, "", arr, nil, nil, 0, self.scale, self.comboWidth, self.comboHeight)
+    ImGui.TableNextRow(ctx)
+    ImGui.TableNextColumn(ctx)
+    ImGui.PlotLines(ctx, "", arr, nil, nil, 0, self.scale, self.comboWidth, self.comboHeight)
 end
 
 function FadeInfo:AnimateTransition()
-    local t = self.timer / FadeInfo.TIMER_MAX
+    local t = self.timer / FadeInfo.TimerMax
     for i, _ in ipairs(self.curve.current) do
         self.curve.current[i] = Maths.Clamp(
             self.curve.previous[i] +
@@ -90,95 +99,109 @@ function FadeInfo:UpdateCurrentCurve(array)
     end
 end
 
-function FadeInfo:GetCurveArray(fadeShape)
-    local array = {}
-    if fadeShape == FadeShape.fastStart then
-        array = self.dir == FadeDirection.In and Curve():PlotFastStart(2.0) or Curve():PlotFastStartR(2.0)
-    elseif fadeShape == FadeShape.fastEnd then
-        array = self.dir == FadeDirection.In and Curve():PlotFastEnd(2.0) or Curve():PlotFastEndR(2.0)
-    elseif fadeShape == FadeShape.fastStartSteep then
-        array = self.dir == FadeDirection.In and Curve():PlotFastStart(4.0) or Curve():PlotFastStartR(4.0)
-    elseif fadeShape == FadeShape.fastEndSteep then
-        array = self.dir == FadeDirection.In and Curve():PlotFastEnd(4.0) or Curve():PlotFastEndR(4.0)
-    elseif fadeShape == FadeShape.slowStartEnd then
-        array = self.dir == FadeDirection.In and Curve():PlotSlowStartEnd(2.5) or Curve():PlotSlowStartEndR(2.5)
-    elseif fadeShape == FadeShape.slowStartEndSteep then
-        array = self.dir == FadeDirection.In and Curve():PlotSlowStartEnd(7.0) or Curve():PlotSlowStartEndR(7.0)
-    else
-        array = self.dir == FadeDirection.In and Curve():PlotLinear() or Curve():PlotLinearR()
-    end
-    return array
+---@param shape FadeShapeIndex
+---@return number[]
+function FadeInfo:GetCurveArrayIn(shape)
+    local cases <const> = {
+        [0] = function() return Curve():PlotLinear() end,
+        [1] = function() return Curve():PlotFastStart(2.0) end,
+        [2] = function() return Curve():PlotFastEnd(2.0) end,
+        [3] = function() return Curve():PlotFastStart(4.0) end,
+        [4] = function() return Curve():PlotFastEnd(4.0) end,
+        [5] = function() return Curve():PlotSlowStartEnd(2.5) end,
+        [6] = function() return Curve():PlotSlowStartEnd(7.0) end
+    } return (cases[shape] or function() return nil end)()
 end
 
-function FadeInfo:TransitionTo(fadeShape)
-    local array = self:GetCurveArray(fadeShape)
+---@param shape FadeShapeIndex
+---@return number[]
+function FadeInfo:GetCurveArrayOut(shape)
+    local cases <const> = {
+        [0] = function() return Curve():PlotLinearR() end,
+        [1] = function() return Curve():PlotFastStartR(2.0) end,
+        [2] = function() return Curve():PlotFastEndR(2.0) end,
+        [3] = function() return Curve():PlotFastStartR(4.0) end,
+        [4] = function() return Curve():PlotFastEndR(4.0) end,
+        [5] = function() return Curve():PlotSlowStartEndR(2.5) end,
+        [6] = function() return Curve():PlotSlowStartEndR(7.0) end
+    } return (cases[shape] or function() return nil end)()
+end
+
+---@param shape FadeShapeIndex
+function FadeInfo:TransitionTo(shape)
+    local array <const> = self.dir == 0 and self:GetCurveArrayIn(shape) or self:GetCurveArrayOut(shape)
     self:UpdateCurrentCurve(array)
 
     self.isMoving = true
     self.timer = 0
 
-    self.shape = fadeShape
+    self.shape = shape
 end
 
+---@param ctx ImGui_Context
 function FadeInfo:DrawPreviewPlot(ctx)
-    local fontSize = reaper.ImGui_GetFontSize(ctx)
-    local width = reaper.ImGui_GetWindowWidth(ctx) * 0.5 - self.constWidthOffset
-    local height = reaper.ImGui_GetWindowHeight(ctx) - fontSize * 4.0 - self.constHeightOffset
+    local fontSize <const> = ImGui.GetFontSize(ctx)
+    local width <const> = ImGui.GetWindowWidth(ctx) * 0.5 - self.constWidthOffset
+    local height <const> = ImGui.GetWindowHeight(ctx) - fontSize * 4.0 - self.constHeightOffset
 
-    local array = reaper.new_array(self.curve.current)
-    reaper.ImGui_PlotLines(ctx, "", array, nil, nil, 0, self.scale, width, height)
+    local array <const> = reaper.new_array(self.curve.current)
+    ImGui.PlotLines(ctx, "", array, nil, nil, 0, self.scale, width, height)
 end
 
-function FadeInfo:DrawPlot(ctx, fadeShape)
-    if fadeShape == FadeShape.linear then
-        self:DrawLinear(ctx)
-    elseif fadeShape == FadeShape.fastStart then
-        self:DrawFastStart(ctx)
-    elseif fadeShape == FadeShape.fastEnd then
-        self:DrawFastEnd(ctx)
-    elseif fadeShape == FadeShape.fastStartSteep then
-        self:DrawFastStartSteep(ctx)
-    elseif fadeShape == FadeShape.fastEndSteep then
-        self:DrawFastEndSteep(ctx)
-    elseif fadeShape == FadeShape.slowStartEnd then
-        self:DrawSlowStartEnd(ctx)
-    elseif fadeShape == FadeShape.slowStartEndSteep then
-        self:DrawSlowStartEndSteep(ctx)
-    else
-        Debug:Log("FadeInfo:DrawPlot() Out of bounds")
+---@param index FadeShapeIndex
+---@return reaper.array|nil
+function FadeInfo:GetPlot(index)
+    local cases <const> = {
+        [0] = function() return self.linear end,
+        [1] = function() return self.fastStart end,
+        [2] = function() return self.fastEnd end,
+        [3] = function() return self.fastStartSteep end,
+        [4] = function() return self.fastEndSteep end,
+        [5] = function() return self.slowStartEnd end,
+        [6] = function() return self.slowStartEndSteep end,
+    } return (cases[index] or function() return nil end)()
+end
+
+---@param index FadeShapeIndex
+---@return string
+function FadeInfo.GetName(index)
+    local cases <const> = {
+        [0] = function() return "linear" end,
+        [1] = function() return "fastStart" end,
+        [2] = function() return "fastEnd" end,
+        [3] = function() return "fastStartSteep" end,
+        [4] = function() return "fastEndSteep" end,
+        [5] = function() return "slowStartEnd" end,
+        [6] = function() return "slowStartEndSteep" end,
+    } return (cases[index] or function() return nil end)()
+end
+
+---@param ctx ImGui_Context
+---@param shape FadeShapeIndex
+function FadeInfo:DrawPlot(ctx, shape)
+    local plot <const> = self:GetPlot(shape)
+    if plot then
+        self:DrawItemPlot(ctx, plot)
     end
 end
 
-function FadeInfo:DrawLinear(ctx) self:DrawItemPlot(ctx, self.linear) end
-
-function FadeInfo:DrawFastStart(ctx) self:DrawItemPlot(ctx, self.fastStart) end
-
-function FadeInfo:DrawFastEnd(ctx) self:DrawItemPlot(ctx, self.fastEnd) end
-
-function FadeInfo:DrawFastStartSteep(ctx) self:DrawItemPlot(ctx, self.fastStartSteep) end
-
-function FadeInfo:DrawFastEndSteep(ctx) self:DrawItemPlot(ctx, self.fastEndSteep) end
-
-function FadeInfo:DrawSlowStartEnd(ctx) self:DrawItemPlot(ctx, self.slowStartEnd) end
-
-function FadeInfo:DrawSlowStartEndSteep(ctx) self:DrawItemPlot(ctx, self.slowStartEndSteep) end
-
---#endregion
-
---#region ItemFader
-
+---@class ItemFader : GuiBase
+---@operator call: ItemFader
 ItemFader = GuiBase:extend()
-ItemFader.regularCol = 0x1D2F49f2
-ItemFader.hoverCol = 0x335c96f2
-ItemFader.SLIDER_MIN = 0
-ItemFader.SLIDER_MAX = 100
+
+ItemFader.RegColor = 0x1D2F49f2
+ItemFader.HoverColor = 0x335c96f2
+ItemFader.SliderMin = 0
+ItemFader.SliderMax = 100
+ItemFader.FadeShapeMax = 7
 
 function ItemFader:new(name, undoText)
     ItemFader.super.new(self, name, undoText)
 
     -- project
     self.lastProjectState = nil
-    self.items = Items(FillType.Selected)
+    self.project = Project(THIS_PROJECT)
+    self.items = self.project:GetSelectedItems()
     self.highlightIndex = 0
 
     -- processing
@@ -186,18 +209,17 @@ function ItemFader:new(name, undoText)
     self.fadeOutRatio = self:GetItemFadeOutAverage()
 
     -- config
+    self.config = Config(FileSys.GetRawName(name))
     self.configKeyCurveIn = "fadeCurveIn"
     self.configKeyCurveOut = "fadeCurveOut"
-    self.config = Config(FileSys.GetRawName(name))
 
-    local fadeShapeIn <const> = tonumber(self.config:Read(self.configKeyCurveIn)) or 0
-    -- set in curve
-    local fadeShapeOut <const> = tonumber(self.config:Read(self.configKeyCurveOut)) or 0
-    -- set out curve
+    --todo: clamp
+    local fadeShapeIn <const> = self.config:ReadNumber(self.configKeyCurveIn) or 0 ---@cast fadeShapeIn FadeShapeIndex
+    local fadeShapeOut <const> = self.config:ReadNumber(self.configKeyCurveOut) or 0 ---@cast fadeShapeOut FadeShapeIndex
 
     -- fadeInfo
-    self.fadeIn = FadeInfo(32, FadeDirection.In, fadeShapeIn)
-    self.fadeOut = FadeInfo(32, FadeDirection.Out, fadeShapeOut)
+    self.fadeIn = FadeInfo(32, 0, fadeShapeIn)
+    self.fadeOut = FadeInfo(32, 1, fadeShapeOut)
 
     self.fadeIn:TransitionTo(fadeShapeIn)
     self.fadeOut:TransitionTo(fadeShapeOut)
@@ -210,65 +232,63 @@ function ItemFader:new(name, undoText)
 end
 
 function ItemFader:OnClose()
-    self:Complete(reaper.UndoState.Items)
+    self:Complete(4)
 end
 
 function ItemFader:GetItemFadeInAverage()
-    local items <const> = Items(FillType.Selected)
+    local items <const> = self.project:GetSelectedItems()
     local totalAverage = 0
-    for _, item in ipairs(items.array) do
-        totalAverage = totalAverage + (item:GetFadeInLength() / item:GetLength() * 100)
+    for _, item in ipairs(items) do
+        totalAverage = totalAverage + (item:GetValue("D_FADEINLEN") / item:GetValue("D_LENGTH") * 100)
     end
-    local totalCount <const> = items:Size()
-    return totalCount > 0 and totalAverage / totalCount or ItemFader.SLIDER_MIN
+    return #items > 0 and totalAverage / #items or ItemFader.SliderMin
 end
 
 function ItemFader:GetItemFadeOutAverage()
-    local items <const> = Items(FillType.Selected)
+    local items <const> = self.project:GetSelectedItems()
     local totalAverage = 0
-    for _, item in ipairs(items.array) do
-        totalAverage = totalAverage + (item:GetFadeOutLength() / item:GetLength() * 100)
+    for _, item in ipairs(items) do
+        totalAverage = totalAverage + (item:GetValue("D_FADEOUTLEN") / item:GetValue("D_LENGTH") * 100)
     end
-    local totalCount <const> = items:Size()
-    return totalCount > 0 and 100 - (totalAverage / totalCount) or ItemFader.SLIDER_MAX
+    return #items > 0 and 100 - (totalAverage / #items) or ItemFader.SliderMax
 end
 
 function ItemFader:FadeSelectedItemsIn()
-    for _, item in ipairs(self.items.array) do
-        item:SetFadeInLength(item:GetLength() * self.fadeInRatio * 0.01)
-        item:SetFadeInShape(self.fadeIn.shape)
+    for _, item in ipairs(self.items) do
+        item:SetValue("D_FADEINLEN", item:GetValue("D_LENGTH") * self.fadeInRatio * 0.01)
+        item:SetValue("C_FADEINSHAPE", self.fadeIn.shape)
     end
     reaper.UpdateArrange()
 end
 
 function ItemFader:FadeSelectedItemsOut()
-    for _, item in ipairs(self.items.array) do
-        item:SetFadeOutLength(item:GetLength() * (ItemFader.SLIDER_MAX - self.fadeOutRatio) * 0.01)
-        item:SetFadeOutShape(self.fadeOut.shape)
+    for _, item in ipairs(self.items) do
+        item:SetValue("D_FADEOUTLEN", item:GetValue("D_LENGTH") * (ItemFader.SliderMax - self.fadeOutRatio) * 0.01)
+        item:SetValue("C_FADEOUTSHAPE", self.fadeOut.shape)
     end
     reaper.UpdateArrange()
 end
 
 function ItemFader:IsSliderInput()
-    return reaper.ImGui_IsItemActive(self.ctx) and reaper.ImGui_IsMouseDown(self.ctx, 0)
+    return ImGui.IsItemActive(self.ctx) and ImGui.IsMouseDown(self.ctx, 0)
 end
 
 function ItemFader:IsTypedInput()
-    return reaper.ImGui_IsItemFocused(self.ctx) and reaper.ImGui_IsEnterKeyPressed(self.ctx)
+    return ImGui.IsItemFocused(self.ctx) and ImGuiExt.IsEnterKeyPressed(self.ctx)
 end
 
 function ItemFader:GetScrollValueIfHovered()
-    if not reaper.ImGui_IsItemHovered(self.ctx) then return 0 end
-    return math.floor(reaper.ImGui_GetMouseWheel(self.ctx))
+    if not ImGui.IsItemHovered(self.ctx) then return 0 end
+    return math.floor(ImGui.GetMouseWheel(self.ctx))
 end
 
 function ItemFader:DrawFadeInRatioSlider()
-    reaper.ImGui_PushID(self.ctx, "FadeInRatio")
+    ImGui.PushID(self.ctx, "FadeInRatio")
     _, self.fadeInRatio =
-        reaper.ImGui_SliderDouble(self.ctx, "Ratio: ", self.fadeInRatio, ItemFader.SLIDER_MIN, ItemFader.SLIDER_MAX,
+        ImGui.SliderDouble(self.ctx, "Ratio: ", self.fadeInRatio, ItemFader.SliderMin, ItemFader.SliderMax,
             "%06.2f",
-            reaper.ImGui_SliderFlags_AlwaysClamp())
-    reaper.ImGui_PopID(self.ctx)
+            ImGui.SliderFlags_AlwaysClamp)
+    ImGui.PopID(self.ctx)
 
     if self:IsSliderInput() then
         self:FadeSelectedItemsIn()
@@ -281,21 +301,21 @@ function ItemFader:DrawFadeInRatioSlider()
 
     local value = self:GetScrollValueIfHovered()
     if value ~= 0 then
-        self.fadeInRatio = Maths.Clamp(self.fadeInRatio + value, ItemFader.SLIDER_MIN, ItemFader.SLIDER_MAX)
+        self.fadeInRatio = Maths.Clamp(self.fadeInRatio + value, ItemFader.SliderMin, ItemFader.SliderMax)
         self:FadeSelectedItemsIn()
     end
 end
 
--- FadeOutRatio is reversed to visualize a fade as percentage from item's right-edge
--- This is implemented by subtracting ratio from SLIDER_MAX (100.0)
+--- FadeOutRatio is reversed to visualize a fade as percentage from item's right-edge
+--- This is implemented by subtracting ratio from SLIDER_MAX (100.0)
 function ItemFader:DrawFadeOutRatioSlider()
-    local display <const> = ItemFader.SLIDER_MAX - self.fadeOutRatio
-    reaper.ImGui_PushID(self.ctx, "FadeOutRatio")
+    local display <const> = ItemFader.SliderMax - self.fadeOutRatio
+    ImGui.PushID(self.ctx, "FadeOutRatio")
     _, self.fadeOutRatio =
-        reaper.ImGui_SliderDouble(self.ctx, "Ratio: ", self.fadeOutRatio, ItemFader.SLIDER_MIN, ItemFader.SLIDER_MAX,
+        ImGui.SliderDouble(self.ctx, "Ratio: ", self.fadeOutRatio, ItemFader.SliderMin, ItemFader.SliderMax,
             string.format("%06.2f", display),
-            reaper.ImGui_SliderFlags_AlwaysClamp())
-    reaper.ImGui_PopID(self.ctx)
+            ImGui.SliderFlags_AlwaysClamp)
+    ImGui.PopID(self.ctx)
 
     if self:IsSliderInput() then
         self:FadeSelectedItemsOut()
@@ -311,77 +331,82 @@ function ItemFader:DrawFadeOutRatioSlider()
 
     local value = self:GetScrollValueIfHovered()
     if value ~= 0 then
-        self.fadeOutRatio = Maths.Clamp(self.fadeOutRatio + value, ItemFader.SLIDER_MIN, ItemFader.SLIDER_MAX)
+        self.fadeOutRatio = Maths.Clamp(self.fadeOutRatio + value, ItemFader.SliderMin, ItemFader.SliderMax)
         self:FadeSelectedItemsOut()
     end
 end
 
-function ItemFader:SaveConfigFile(fadeInfo, fadeShape)
-    if fadeInfo.dir == FadeDirection.In then
-        self.config:Write(self.configKeyCurveIn, tostring(fadeShape))
-    else
-        self.config:Write(self.configKeyCurveOut, tostring(fadeShape))
-    end
+---@param info FadeInfo
+---@param shape FadeShapeIndex
+function ItemFader:SaveConfigFile(info, shape)
+    self.config:Write(info.dir == 0 and self.configKeyCurveIn or self.configKeyCurveOut, tostring(shape))
 end
 
-function ItemFader:Transition(fadeInfo, fadeShape)
-    fadeInfo:TransitionTo(fadeShape)
-    self:SaveConfigFile(fadeInfo, fadeShape)
-    if fadeInfo.dir == FadeDirection.In then
+---@param info FadeInfo
+---@param shape FadeShapeIndex
+function ItemFader:Transition(info, shape)
+    info:TransitionTo(shape)
+    self:SaveConfigFile(info, shape)
+    if info.dir == 0 then
         self:FadeSelectedItemsIn()
     else
         self:FadeSelectedItemsOut()
     end
 end
 
-function ItemFader:DrawStaticCurve(fadeInfo, fadeshape)
-    reaper.ImGui_PushStyleColor(self.ctx, reaper.ImGui_Col_FrameBg(),
-        self.highlightIndex == fadeshape and self.hoverCol or self.regularCol)
-    fadeInfo:DrawPlot(self.ctx, fadeshape)
-    reaper.ImGui_PopStyleColor(self.ctx)
-    if reaper.ImGui_IsItemHovered(self.ctx) then self.highlightIndex = fadeshape end
-    if reaper.ImGui_IsItemClicked(self.ctx) then self:Transition(fadeInfo, fadeshape) end
+---@param info FadeInfo
+---@param shape FadeShapeIndex
+function ItemFader:DrawStaticCurve(info, shape)
+    ImGui.PushStyleColor(self.ctx, ImGui.Col_FrameBg, self.highlightIndex == shape and self.HoverColor or self.RegColor)
+    info:DrawPlot(self.ctx, shape)
+    ImGui.PopStyleColor(self.ctx)
+
+    if ImGui.IsItemHovered(self.ctx) then self.highlightIndex = shape end
+    if ImGui.IsItemClicked(self.ctx) then self:Transition(info, shape) end
 end
 
-function ItemFader:DrawCurvesCombo(fadeInfo, idStr)
-    reaper.ImGui_SetNextItemWidth(self.ctx, reaper.ImGui_GetWindowWidth(self.ctx) * 0.5 - 18) -- 18 is a constant width offset
+---@param info FadeInfo
+---@param id string
+function ItemFader:DrawCurvesCombo(info, id)
+    ImGui.SetNextItemWidth(self.ctx, ImGui.GetWindowWidth(self.ctx) * 0.5 - 18) -- 18 is a constant width offset
 
-    reaper.ImGui_PushID(self.ctx, idStr)
-    reaper.ImGui_PushStyleColor(self.ctx, reaper.ImGui_Col_PopupBg(), 0x00000000)
-    reaper.ImGui_PushStyleColor(self.ctx, reaper.ImGui_Col_Border(), 0x00000000);
+    ImGui.PushID(self.ctx, id)
+    ImGui.PushStyleColor(self.ctx, ImGui.Col_PopupBg, 0x00000000)
+    ImGui.PushStyleColor(self.ctx, ImGui.Col_Border, 0x00000000);
 
-    if reaper.ImGui_BeginCombo(self.ctx, "", FadeShape.GetName(fadeInfo.shape), reaper.ImGui_ComboFlags_HeightLargest()) then
-        reaper.ImGui_PushStyleColor(self.ctx, reaper.ImGui_Col_Text(), 0xffffff00);
-        reaper.ImGui_PushStyleColor(self.ctx, reaper.ImGui_Col_TableBorderStrong(), 0xffffffff);
-        if reaper.ImGui_BeginTable(self.ctx, "table", 1, reaper.ImGui_TableFlags_Borders(), 110) then -- 110 is constant table width
-            self:DrawStaticCurve(fadeInfo, FadeShape.linear)
-            self:DrawStaticCurve(fadeInfo, FadeShape.fastStart)
-            self:DrawStaticCurve(fadeInfo, FadeShape.fastEnd)
-            self:DrawStaticCurve(fadeInfo, FadeShape.fastStartSteep)
-            self:DrawStaticCurve(fadeInfo, FadeShape.fastEndSteep)
-            self:DrawStaticCurve(fadeInfo, FadeShape.slowStartEnd)
-            self:DrawStaticCurve(fadeInfo, FadeShape.slowStartEndSteep)
+    if ImGui.BeginCombo(self.ctx, "", FadeInfo.GetName(info.shape), ImGui.ComboFlags_HeightLargest) then
+        ImGui.PushStyleColor(self.ctx, ImGui.Col_Text, 0xffffff00);
+        ImGui.PushStyleColor(self.ctx, ImGui.Col_TableBorderStrong, 0xffffffff);
+        if ImGui.BeginTable(self.ctx, "table", 1, ImGui.TableFlags_Borders, 110) then -- 110 is constant table width
+            self:DrawStaticCurve(info, 0)
+            self:DrawStaticCurve(info, 1)
+            self:DrawStaticCurve(info, 2)
+            self:DrawStaticCurve(info, 3)
+            self:DrawStaticCurve(info, 4)
+            self:DrawStaticCurve(info, 5)
+            self:DrawStaticCurve(info, 6)
 
-            reaper.ImGui_PopStyleColor(self.ctx, 2)
-            reaper.ImGui_EndTable(self.ctx)
+            ImGui.PopStyleColor(self.ctx, 2)
+            ImGui.EndTable(self.ctx)
         end
-        reaper.ImGui_EndCombo(self.ctx)
+        ImGui.EndCombo(self.ctx)
     end
 
-    reaper.ImGui_PopStyleColor(self.ctx, 2)
-    reaper.ImGui_PopID(self.ctx)
-    reaper.ImGui_Spacing(self.ctx)
+    ImGui.PopStyleColor(self.ctx, 2)
+    ImGui.PopID(self.ctx)
+    ImGui.Spacing(self.ctx)
 
-    self:HandleHoverScrollTransition(fadeInfo)
+    self:HandleHoverScrollTransition(info)
 end
 
-function ItemFader:HandleHoverScrollTransition(fadeInfo)
-    local value = self:GetScrollValueIfHovered()
+---@param info FadeInfo
+function ItemFader:HandleHoverScrollTransition(info)
+    local value <const> = self:GetScrollValueIfHovered()
     if value == 0 then return end
-    
-    local next = fadeInfo.shape - value
-    if next >= 0 and next < FadeShape.max then
-        self:Transition(fadeInfo, next)
+
+    local next <const> = info.shape - value
+    if next >= 0 and next < ItemFader.FadeShapeMax  then
+        self:Transition(info, next)
     end
 end
 
@@ -389,24 +414,24 @@ function ItemFader:Frame()
     local latestState <const> = reaper.GetProjectStateChangeCount(THIS_PROJECT)
     if self.lastProjectState ~= latestState then
         self.lastProjectState = latestState
-        self.items:FillSelected()
+        self.items = self.project:GetSelectedItems()
     end
 
     self.fadeIn:Tick(self.ctx)
     self.fadeOut:Tick(self.ctx)
 
-    if reaper.ImGui_BeginTable(self.ctx, "table", 2, reaper.ImGui_TableFlags_Borders()) then
+    if ImGui.BeginTable(self.ctx, "table", 2, ImGui.TableFlags_Borders) then
         -- table setup
-        reaper.ImGui_TableSetupColumn(self.ctx, "Fade In")
-        reaper.ImGui_TableSetupColumn(self.ctx, "Fade Out")
+        ImGui.TableSetupColumn(self.ctx, "Fade In")
+        ImGui.TableSetupColumn(self.ctx, "Fade Out")
 
-        reaper.ImGui_TableHeadersRow(self.ctx)
-        reaper.ImGui_TableNextRow(self.ctx)
+        ImGui.TableHeadersRow(self.ctx)
+        ImGui.TableNextRow(self.ctx)
 
         -- fade in display
-        reaper.ImGui_TableSetColumnIndex(self.ctx, 0)
+        ImGui.TableSetColumnIndex(self.ctx, 0)
 
-        reaper.ImGui_Spacing(self.ctx)
+        ImGui.Spacing(self.ctx)
         self.fadeIn:DrawPreviewPlot(self.ctx)
         self:HandleHoverScrollTransition(self.fadeIn)
 
@@ -415,9 +440,9 @@ function ItemFader:Frame()
         self:DrawCurvesCombo(self.fadeIn, "FadeIn")
 
         -- fade out display
-        reaper.ImGui_TableSetColumnIndex(self.ctx, 1)
+        ImGui.TableSetColumnIndex(self.ctx, 1)
 
-        reaper.ImGui_Spacing(self.ctx)
+        ImGui.Spacing(self.ctx)
         self.fadeOut:DrawPreviewPlot(self.ctx)
         self:HandleHoverScrollTransition(self.fadeOut)
 
@@ -425,15 +450,17 @@ function ItemFader:Frame()
 
         self:DrawCurvesCombo(self.fadeOut, "FadeOut")
 
-        reaper.ImGui_EndTable(self.ctx)
+        ImGui.EndTable(self.ctx)
     end
 
-    if reaper.ImGui_IsEnterKeyPressed(self.ctx) then
+    if ImGuiExt.IsEnterKeyPressed(self.ctx) then
         self:Close()
     end
 end
 
 --#endregion
+
+local scriptPath <const> = debug.getinfo(1).source
 
 local _, scriptName <const>, _ = FileSys.Path.Parse(scriptPath)
 
