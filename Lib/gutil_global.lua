@@ -1,30 +1,30 @@
--- @description GUtilities libraries (essential)
+-- @description GUtilities libraries
 -- @author guonaudio
 -- @version 1.0
 -- @provides 
 --   [nomain] .
---   [nomain] lua/gutil_classic.lua
---   [nomain] lua/gutil_color.lua
---   [nomain] lua/gutil_curve.lua
---   [nomain] lua/gutil_file.lua
---   [nomain] lua/gutil_filesystem.lua
---   [nomain] lua/gutil_maths.lua
---   [nomain] lua/gutil_string.lua
---   [nomain] lua/gutil_table.lua
---   [nomain] reaper/gutil_action.lua
---   [nomain] reaper/gutil_cmd.lua
---   [nomain] reaper/gutil_config.lua
---   [nomain] reaper/gutil_dependency.lua
---   [nomain] reaper/gutil_dialog.lua
---   [nomain] reaper/gutil_gui.lua
---   [nomain] reaper/gutil_item.lua
---   [nomain] reaper/gutil_os.lua
---   [nomain] reaper/gutil_progressbar.lua
---   [nomain] reaper/gutil_project.lua
---   [nomain] reaper/gutil_source.lua
---   [nomain] reaper/gutil_take.lua
---   [nomain] reaper/gutil_track.lua
---   [nomain] full/sourcevalidator.lua
+--   [nomain] Lua/gutil_classic.lua
+--   [nomain] Lua/gutil_color.lua
+--   [nomain] Lua/gutil_curve.lua
+--   [nomain] Lua/gutil_file.lua
+--   [nomain] Lua/gutil_filesystem.lua
+--   [nomain] Lua/gutil_maths.lua
+--   [nomain] Lua/gutil_string.lua
+--   [nomain] Lua/gutil_table.lua
+--   [nomain] Reaper/gutil_action.lua
+--   [nomain] Reaper/gutil_cmd.lua
+--   [nomain] Reaper/gutil_config.lua
+--   [nomain] Reaper/gutil_dependency.lua
+--   [nomain] Reaper/gutil_dialog.lua
+--   [nomain] Reaper/gutil_gui.lua
+--   [nomain] Reaper/gutil_item.lua
+--   [nomain] Reaper/gutil_os.lua
+--   [nomain] Reaper/gutil_progressbar.lua
+--   [nomain] Reaper/gutil_project.lua
+--   [nomain] Reaper/gutil_source.lua
+--   [nomain] Reaper/gutil_take.lua
+--   [nomain] Reaper/gutil_track.lua
+--   [nomain] Full/sourcevalidator.lua
 -- @changelog
 --   Initial Release
 -- @about
