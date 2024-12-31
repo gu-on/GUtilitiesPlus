@@ -1,6 +1,6 @@
 -- @description GUtilities libraries
 -- @author guonaudio
--- @version 1.1
+-- @version 1.2
 -- @provides 
 --   [nomain] .
 --   [nomain] Lua/gutil_classic.lua
@@ -14,6 +14,7 @@
 --   [nomain] Reaper/gutil_action.lua
 --   [nomain] Reaper/gutil_cmd.lua
 --   [nomain] Reaper/gutil_config.lua
+--   [nomain] Reaper/gutil_debug.lua
 --   [nomain] Reaper/gutil_dependency.lua
 --   [nomain] Reaper/gutil_dialog.lua
 --   [nomain] Reaper/gutil_gui.lua
@@ -26,7 +27,7 @@
 --   [nomain] Reaper/gutil_track.lua
 --   [nomain] Full/sourcevalidator.lua
 -- @changelog
---   Initial Release
+--   Add missing dependency
 -- @about
 --   Main library for handling all other required libraries
 
