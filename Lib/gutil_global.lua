@@ -1,12 +1,11 @@
--- @description GUtilities libraries
+-- @description GUtilities libraries (essential)
 -- @author guonaudio
--- @version 1.3
+-- @version 2.1
 -- @provides 
 --   [nomain] .
 --   [nomain] Lua/gutil_classic.lua
 --   [nomain] Lua/gutil_color.lua
 --   [nomain] Lua/gutil_curve.lua
---   [nomain] Lua/gutil_file.lua
 --   [nomain] Lua/gutil_filesystem.lua
 --   [nomain] Lua/gutil_maths.lua
 --   [nomain] Lua/gutil_string.lua
@@ -14,8 +13,8 @@
 --   [nomain] Reaper/gutil_action.lua
 --   [nomain] Reaper/gutil_cmd.lua
 --   [nomain] Reaper/gutil_config.lua
---   [nomain] Reaper/gutil_debug.lua
 --   [nomain] Reaper/gutil_dependency.lua
+--   [nomain] Reaper/gutil_debug.lua
 --   [nomain] Reaper/gutil_dialog.lua
 --   [nomain] Reaper/gutil_gui.lua
 --   [nomain] Reaper/gutil_item.lua
@@ -27,14 +26,15 @@
 --   [nomain] Reaper/gutil_track.lua
 --   [nomain] Full/sourcevalidator.lua
 -- @changelog
---   Add missing dependency
+--   Match require case to path case for Unix systems
+--   Remove file class and replace with simply using io.open
 -- @about
 --   Main library for handling all other required libraries
 
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-Dependency = require('reaper.gutil_dependency')
+Dependency = require('Reaper.gutil_dependency')
 Dependency.CheckAll()
 
 reaper.AudioFormats = { "WAV", "AIFF", "FLAC", "MP3", "OGG", "BWF", "W64", "WAVPACK" }

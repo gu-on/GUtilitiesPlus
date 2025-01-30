@@ -1,24 +1,25 @@
 -- @description SFZ creator
 -- @author guonaudio
--- @version 1.0b
+-- @version 1.2b
 -- @changelog
---   Initial Release
+--   Match require case to path case for Unix systems
 -- @about
 --   Move items to first found track with the same name
 
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('lua.gutil_classic')
-require('lua.gutil_filesystem')
-require('lua.gutil_table')
-require('reaper.gutil_config')
-require('reaper.gutil_gui')
-require('reaper.gutil_item')
-require('reaper.gutil_os')
-require('reaper.gutil_project')
-require('reaper.gutil_source')
-require('reaper.gutil_take')
+require('gutil_global')
+require('Lua.gutil_classic')
+require('Lua.gutil_filesystem')
+require('Lua.gutil_table')
+require('Reaper.gutil_config')
+require('Reaper.gutil_gui')
+require('Reaper.gutil_item')
+require('Reaper.gutil_os')
+require('Reaper.gutil_project')
+require('Reaper.gutil_source')
+require('Reaper.gutil_take')
 
 ---@alias MidiKey "C"|"C#"|"D"|"D#"|"E"|"F"|"F#"|"G"|"G#"|"A"|"A#"|"B"
 ---@alias MidiValue -1|0|1|2|3|4|5|6|7|8|9|10|11
@@ -100,11 +101,11 @@ Sample = Object:extend()
 function Sample:new(name, ext, seq, key, dyn, lovel, hivel)
     self.name = name
     self.ext = ext
-    self.seq = toint(Str.ExtractNumber(seq or MIDI.NA))
+    self.seq = seq and toint(Str.ExtractNumber(seq)) or MIDI.NA
     self.key = Str.IsNumber(key) and toint(key) or self:CalculateMIDIValue(key)
     self.lokey = MIDI.NA
     self.hikey = MIDI.NA
-    self.dyn = toint(Str.ExtractNumber(dyn or MIDI.NA))
+    self.dyn = toint(Str.ExtractNumber(dyn)) or MIDI.NA
     self.lovel = lovel and toint(Str.ExtractNumber(lovel)) or MIDI.NA
     self.hivel = hivel and toint(Str.ExtractNumber(hivel)) or MIDI.NA
 end
@@ -302,11 +303,13 @@ function SfzMaker:CreateSFZ()
 
     -- update velocity
     if self.index.lovel == MIDI.NA and self.index.hivel == MIDI.NA and self.index.dyn ~= MIDI.NA then
-        local velMap <const> = self:GenerateVelocityMap(self.samplesInfo.dynTotal)
+        if self.samplesInfo.dynTotal > 0 then
+            local velMap <const> = self:GenerateVelocityMap(self.samplesInfo.dynTotal)
 
-        for _, sample in pairs(self.samplesIn) do
-            sample.lovel = velMap[sample.dyn].min
-            sample.hivel = velMap[sample.dyn].max
+            for _, sample in pairs(self.samplesIn) do
+                sample.lovel = velMap[sample.dyn].min
+                sample.hivel = velMap[sample.dyn].max
+            end
         end
     end
 
@@ -421,18 +424,23 @@ end
 
 function GuiSfzMaker:PrintToSFZ()
     local defaultPath <const> = self.config:ReadString(self.cfgInfo.csvPath) or FileSys.Path.Default()
-    local extensionList <const> = "CSV (.sfz)\0*.sfz\0\0"
+    local extensionList <const> = "SFZ (.sfz)\0*.sfz\0\0"
     local windowTitle <const> = "Save SFZ to location"
 
     local directory <const>, _, _ = FileSys.Path.Parse(defaultPath)
     local project <const> = Project(THIS_PROJECT)
-    local path <const> = FileSys.SaveDialog(windowTitle, directory, project:GetName() .. ".SFZ", extensionList)
+    local path <const> = FileSys.SaveDialog(windowTitle, directory, project:GetName() .. ".sfz", extensionList)
 
     if Str.IsNilOrEmpty(path) then return end
 
-    local file <close> = File(path, File.Mode.Write)
+    local file <close>, err <const> = io.open(path, "w")
 
-    file:Write(self.output)
+    if not file then
+        reaper.ShowConsoleMsg(("Could not open %s for PrintToSFZ.\n Returned following error: %s"):format(path, err))
+        return
+    end
+
+    file:write(self.output) -- todo add ".sfz" if doesn't contain ".sfz" as final 4 characters
 
     self.config:Write(self.cfgInfo.csvPath, path)
 end

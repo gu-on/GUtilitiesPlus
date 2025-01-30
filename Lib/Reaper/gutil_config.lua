@@ -4,8 +4,8 @@ local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '..
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')
-require('lua.gutil_classic')
-require('lua.gutil_string')
+require('Lua.gutil_classic')
+require('Lua.gutil_string')
 
 ---@class Config : Object Manages config file read/write
 ---@operator call: Config

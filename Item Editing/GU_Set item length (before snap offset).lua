@@ -1,22 +1,22 @@
 -- @description Set item length before snap offset
 -- @author guonaudio
--- @version 1.1
+-- @version 1.2
 -- @changelog
---   Refactor to make better use of Lua Language Server
---   Fixed bug where Item with Take containing stretch markers wouldn't be affected
+--   Match require case to path case for Unix systems
 -- @about
 --   Sets the length of the item to the left of its snap offset (in seconds)
 
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('lua.gutil_filesystem')
-require('reaper.gutil_config')
-require('reaper.gutil_gui')
-require('reaper.gutil_item')
-require('reaper.gutil_os')
-require('reaper.gutil_project')
-require('reaper.gutil_take')
+require('gutil_global')
+require('Lua.gutil_filesystem')
+require('Reaper.gutil_config')
+require('Reaper.gutil_gui')
+require('Reaper.gutil_item')
+require('Reaper.gutil_os')
+require('Reaper.gutil_project')
+require('Reaper.gutil_take')
 
 ---@class AdjusterBefore : GuiBase
 AdjusterBefore = GuiBase:extend()

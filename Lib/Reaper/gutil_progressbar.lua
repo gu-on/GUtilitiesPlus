@@ -3,7 +3,7 @@
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('reaper.gutil_gui')
+require('Reaper.gutil_gui')
 
 ---@class ProgressBar : GuiBase
 ---@overload fun(name: string): ProgressBar 

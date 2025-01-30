@@ -1,8 +1,8 @@
 -- @description Batch import
 -- @author guonaudio
--- @version 1.1
+-- @version 1.2
 -- @changelog
---   Refactor to make better use of Lua Language Server
+--   Match require case to path case for Unix systems
 -- @about
 --   Batch imports media files recursively from a given source directory
 
@@ -10,19 +10,19 @@ local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '..
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')
-require('lua.gutil_classic')
-require('lua.gutil_filesystem')
-require('lua.gutil_maths')
-require('reaper.gutil_action')
-require('reaper.gutil_config')
-require('reaper.gutil_debug')
-require('reaper.gutil_dialog')
-require('reaper.gutil_item')
-require('reaper.gutil_os')
-require('reaper.gutil_progressbar')
-require('reaper.gutil_project')
-require('reaper.gutil_take')
-require('reaper.gutil_track')
+require('Lua.gutil_classic')
+require('Lua.gutil_filesystem')
+require('Lua.gutil_maths')
+require('Reaper.gutil_action')
+require('Reaper.gutil_config')
+require('Reaper.gutil_debug')
+require('Reaper.gutil_dialog')
+require('Reaper.gutil_item')
+require('Reaper.gutil_os')
+require('Reaper.gutil_progressbar')
+require('Reaper.gutil_project')
+require('Reaper.gutil_take')
+require('Reaper.gutil_track')
 
 ---@class BatchImporter : Object, Action
 ---@operator call: BatchImporter

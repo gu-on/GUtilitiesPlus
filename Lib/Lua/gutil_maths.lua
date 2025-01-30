@@ -33,8 +33,12 @@ function Maths.Erf(x)
     return sign * y
 end
 
-function Maths.Clamp(value, min_range, max_range)
-    return math.min(math.max(value, min_range), max_range)
+---@param value number
+---@param min number
+---@param max number
+---@return any
+function Maths.Clamp(value, min, max)
+    return math.min(math.max(value, min), max)
 end
 
 function Maths.EaseOutBounce(x)

@@ -1,20 +1,21 @@
 -- @description Move selected items to track with same name
 -- @author guonaudio
--- @version 1.1
+-- @version 1.2
 -- @changelog
---   Refactor to make better use of Lua Language Server
+--   Match require case to path case for Unix systems
 -- @about
 --   Move items to first found track with the same name
 
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('lua.gutil_classic')
-require('reaper.gutil_action')
-require('reaper.gutil_item')
-require('reaper.gutil_project')
-require('reaper.gutil_take')
-require('reaper.gutil_track')
+require('gutil_global')
+require('Lua.gutil_classic')
+require('Reaper.gutil_action')
+require('Reaper.gutil_item')
+require('Reaper.gutil_project')
+require('Reaper.gutil_take')
+require('Reaper.gutil_track')
 
 ---@class ItemToTrackMover : Action
 ---@operator call : ItemToTrackMover

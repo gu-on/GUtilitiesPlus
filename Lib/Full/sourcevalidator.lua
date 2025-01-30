@@ -3,19 +3,19 @@
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('lua.gutil_classic')
-require('lua.gutil_color')
-require('lua.gutil_table')
-require('lua.gutil_filesystem')
-require('reaper.gutil_config')
-require('reaper.gutil_gui')
-require('reaper.gutil_item')
-require('reaper.gutil_project')
-require('reaper.gutil_source')
-require('reaper.gutil_progressbar')
-require('reaper.gutil_os')
-require('reaper.gutil_take')
-require('reaper.gutil_track')
+require('Lua.gutil_classic')
+require('Lua.gutil_color')
+require('Lua.gutil_table')
+require('Lua.gutil_filesystem')
+require('Reaper.gutil_config')
+require('Reaper.gutil_gui')
+require('Reaper.gutil_item')
+require('Reaper.gutil_project')
+require('Reaper.gutil_source')
+require('Reaper.gutil_progressbar')
+require('Reaper.gutil_os')
+require('Reaper.gutil_take')
+require('Reaper.gutil_track')
 
 ---@class (exact) ValidatorData : Object
 ---@operator call : ValidatorData
@@ -825,20 +825,27 @@ function GuiSrcValidator:PrintToCSV()
 
     if Str.IsNilOrEmpty(path) then return end
 
-    local file <close> = File(path, File.Mode.Write)
+    local file <close>, err <const> = io.open(path, "w")
 
-    -- write headers
-    for _, property in pairs(GuiSrcValidator.Properties) do
-        file:Write(property.title .. ",")
+    if not file then
+        reaper.ShowConsoleMsg(("Could not open %s for PrintToCSV.\n Returned following error: %s"):format(path, err))
+        return
     end
-    file:Write("\n")
 
-    -- write data
-    for _, data in pairs(self.validator.data) do
-        for _, property in ipairs(ValidatorProperty.ExportStrings) do
-            file:Write(tostring(data[property]) .. ",")
+    do -- write headers
+        for _, property in pairs(GuiSrcValidator.Properties) do
+            file:write(property.title .. ",")
         end
-        file:Write("\n")
+        file:write("\n")
+    end
+
+    do -- write data
+        for _, data in pairs(self.validator.data) do
+            for _, property in ipairs(ValidatorProperty.ExportStrings) do
+                file:write(tostring(data[property]) .. ",")
+            end
+            file:write("\n")
+        end
     end
 
     self.config:Write(self.cfgInfo.csvPath, path)

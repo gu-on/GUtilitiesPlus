@@ -1,8 +1,8 @@
 -- @description Item fader
 -- @author guonaudio
--- @version 1.2
+-- @version 1.3
 -- @changelog
---   Refactor to make better use of Lua Language Server
+--   Match require case to path case for Unix systems
 -- @about
 --   Batch fades items based on percentage of length.
 
@@ -10,14 +10,14 @@ local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '..
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')
-require('lua.gutil_classic')
-require('lua.gutil_curve')
-require('lua.gutil_filesystem')
-require('reaper.gutil_config')
-require('reaper.gutil_gui')
-require('reaper.gutil_item')
-require('reaper.gutil_os')
-require('reaper.gutil_project')
+require('Lua.gutil_classic')
+require('Lua.gutil_curve')
+require('Lua.gutil_filesystem')
+require('Reaper.gutil_config')
+require('Reaper.gutil_gui')
+require('Reaper.gutil_item')
+require('Reaper.gutil_os')
+require('Reaper.gutil_project')
 
 ---@class FadeInfo : Object
 ---@operator call: FadeInfo

@@ -4,7 +4,7 @@ local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '..
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')
-require('reaper.gutil_debug')
+require('Reaper.gutil_debug')
 
 ---@class Action : Object
 ---@operator call: Action

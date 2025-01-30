@@ -1,26 +1,30 @@
 -- @description Item renamer
 -- @author guonaudio
--- @version 1.1
+-- @version 1.3
 -- @changelog
---   Refactor to make better use of Lua Language Server
+--   Add support for special markers e.g. $marker(key)
+--   Fix $lufs, $rms, and $peak to only follow item extents (before it followed the entire source extents)
+--   Match require case to path case for Unix systems
+--   Limit scroll wheel tooltip for specialRegions Markers and Regions to unique keys, and clamp Track X to 0 when no Items selected 
 -- @about
 --   Batch renames items using similar wildcards annotation as in Reaper's own Render dialog.
 
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('lua.gutil_classic')
-require('lua.gutil_filesystem')
-require('lua.gutil_maths')
-require('lua.gutil_table')
-require('reaper.gutil_config')
-require('reaper.gutil_gui')
-require('reaper.gutil_item')
-require('reaper.gutil_os')
-require('reaper.gutil_project')
-require('reaper.gutil_source')
-require('reaper.gutil_take')
-require('reaper.gutil_track')
+require('gutil_global')
+require('Lua.gutil_classic')
+require('Lua.gutil_filesystem')
+require('Lua.gutil_maths')
+require('Lua.gutil_table')
+require('Reaper.gutil_config')
+require('Reaper.gutil_gui')
+require('Reaper.gutil_item')
+require('Reaper.gutil_os')
+require('Reaper.gutil_project')
+require('Reaper.gutil_source')
+require('Reaper.gutil_take')
+require('Reaper.gutil_track')
 
 ---@class Wildcard : Object
 ---@overload fun(tag: string, tooltip: string): Wildcard
@@ -58,6 +62,8 @@ Wildcards.PEAK = Wildcard("$peak",
 Wildcards.MONTHNAME = Wildcard("$monthname", "The current month's name")
 Wildcards.MONTH = Wildcard("$month", "The current month as MM")
 Wildcards.MINUTE = Wildcard("$minute", "The current minute as mm")
+Wildcards.MARKERX = Wildcard("$marker(%s)",
+    "Name of Marker surrounding Item whose tag prepended by \"=\" is specifed in brackets\n\ne.g. If a Marker is named \"type=drum\"\nusing wildcard \"$marker(type)\"\nwill produce the result \"drum\"")
 Wildcards.MARKER = Wildcard("$marker", "Name of Marker nearest to the left of Item's left edge")
 Wildcards.LUFS = Wildcard("$lufs", "Integrated loudness of Item as dBFS")
 --Wildcards.ITEMNUMBERX = Wildcard("($itemnumber\( = Wildcard(}\))", "Item number in selection")
@@ -102,6 +108,7 @@ ItemRenamer.Error = {
     NO_REGION = "-- No region for first item --",
     NO_SPECIAL_REGION = "-- No special regions in project --",
     NO_MARKER = "-- No marker for first item --",
+    NO_SPECIAL_MARKER = "-- No special marker for first item --",
     NO_FX = "-- No FX for active item --",
     NO_ACTIVE_TAKE = "-- Item missing active take --",
     NO_TAKE_NOTES = "-- Take has no notes --",
@@ -128,6 +135,7 @@ function ItemRenamer:new(name, undoText)
     -- selectors
     self.TrackXSelector = 0
     self.RegionXSelector = 0
+    self.MarkerXSelector = 0
     self.FxXSelector = 0
 
     self.windowWidth = 400
@@ -218,7 +226,7 @@ end
 function ItemRenamer:DrawMenuItemTooltip(tooltip, info, selector)
     selector = selector or 0
     if ImGui.IsItemHovered(self.ctx) then
-        local verticalOut <const>, _ = ImGui.GetMouseWheel(self.ctx);
+        local verticalOut <const> = ImGui.GetMouseWheel(self.ctx);
 
         if verticalOut > 0 then
             selector = selector + 1
@@ -386,12 +394,12 @@ function ItemRenamer:PrintRMS()
 end
 
 function ItemRenamer:PrintTrackX()
+    self.TrackXSelector = Maths.Clamp(self.TrackXSelector, 0, Maths.Int32Max)
+
     local item <const>, itemError = self:TryGetFirstItem()
     if not item then return itemError end
     local take <const>, takeError = self:TryGetFirstTake(item)
     if not take then return takeError end
-
-    self.TrackXSelector = Maths.Clamp(self.TrackXSelector, 0, Maths.Int32Max)
 
     return take:WildcardParse(string.format(Wildcards.TRACKX.tag, self.TrackXSelector))
 end
@@ -402,9 +410,23 @@ function ItemRenamer:PrintRegionX()
 
     if (table.isEmpty(specialRegions)) then return { input = "", output = ItemRenamer.Error.NO_SPECIAL_REGION } end
 
-    self.RegionXSelector = Maths.Clamp(self.RegionXSelector, 1, #specialRegions);
+    local uniqueRegions = {}
+    for _, specialRegion in pairs(specialRegions) do
+        local contains = false
+        for _, uniqueRegion in pairs(uniqueRegions) do
+            if specialRegion.name:sub(1, specialRegion.name:find("=")) == uniqueRegion.name:sub(1, uniqueRegion.name:find("=")) then
+                contains = true
+                break
+            end
+        end
+        if not contains then
+            table.insert(uniqueRegions, specialRegion)
+        end
+    end
 
-    local regionName <const> = specialRegions[self.RegionXSelector].name
+    self.RegionXSelector = Maths.Clamp(self.RegionXSelector, 1, #uniqueRegions);
+
+    local regionName <const> = uniqueRegions[self.RegionXSelector].name
     local equalsPos <const> = string.find(regionName, "=");
     local regionPreEquals <const> = string.sub(regionName, 0, equalsPos - 1)
 
@@ -413,6 +435,40 @@ function ItemRenamer:PrintRegionX()
         input = regionPreEquals,
         output = reaper.GU_WildcardParseTake(self.items[1]:GetActiveTake().id,
             string.format(Wildcards.REGIONX.tag, regionPreEquals))
+    }
+end
+
+function ItemRenamer:PrintMarkerX()
+    if table.isEmpty(self.items) then return { input = "", output = ItemRenamer.Error.NO_ITEM_SELECTION } end
+    local specialMarkers <const> = Project():GetSpecialMarkers()
+
+    if (table.isEmpty(specialMarkers)) then return { input = "", output = ItemRenamer.Error.NO_SPECIAL_MARKER } end
+
+    local uniqueMarkers = {}
+    for _, specialMarker in pairs(specialMarkers) do
+        local contains = false
+        for _, uniqueMarker in pairs(uniqueMarkers) do
+            if specialMarker.name:sub(1, specialMarker.name:find("=")) == uniqueMarker.name:sub(1, uniqueMarker.name:find("=")) then
+                contains = true
+                break
+            end
+        end
+        if not contains then
+            table.insert(uniqueMarkers, specialMarker)
+        end
+    end
+
+    self.MarkerXSelector = Maths.Clamp(self.MarkerXSelector, 1, #uniqueMarkers)
+
+    local markerName <const> = uniqueMarkers[self.MarkerXSelector].name
+    local equalsPos <const> = string.find(markerName, "=");
+    local markerPreEquals <const> = string.sub(markerName, 0, equalsPos - 1)
+
+    return
+    {
+        input = markerPreEquals,
+        output = reaper.GU_WildcardParseTake(self.items[1]:GetActiveTake().id,
+            string.format(Wildcards.MARKERX.tag, markerPreEquals))
     }
 end
 
@@ -447,6 +503,8 @@ function ItemRenamer:DrawMenu()
                 self.RegionXSelector = self:DrawSpecialMenuItemString(Wildcards.REGIONX, self:PrintRegionX(),
                     self.RegionXSelector)
                 self:DrawMenuItem(Wildcards.REGION, self:PrintRegion())
+                self.MarkerXSelector = self:DrawSpecialMenuItemString(Wildcards.MARKERX, self:PrintMarkerX(),
+                    self.MarkerXSelector)
                 self:DrawMenuItem(Wildcards.MARKER, self:PrintMarker())
                 self:DrawMenuItem(Wildcards.TEMPO, self:PrintTag(Wildcards.TEMPO))
                 self:DrawMenuItem(Wildcards.TIMESIG, self:PrintTag(Wildcards.TIMESIG))
@@ -483,9 +541,9 @@ function ItemRenamer:DrawMenu()
                 ImGui.EndMenu(self.ctx);
             end
             if ImGui.BeginMenu(self.ctx, "Metering") then
-                self:DrawMenuItem(Wildcards.LUFS, self:PrintLUFS())
-                self:DrawMenuItem(Wildcards.PEAK, self:PrintPeak())
-                self:DrawMenuItem(Wildcards.RMS, self:PrintRMS())
+                self:DrawMenuItem(Wildcards.LUFS, self:PrintLUFS()) -- todo give example only, don't do real-time
+                self:DrawMenuItem(Wildcards.PEAK, self:PrintPeak()) -- todo give example only, don't do real-time
+                self:DrawMenuItem(Wildcards.RMS, self:PrintRMS()) -- todo give example only, don't do real-time
                 ImGui.EndMenu(self.ctx)
             end
             ImGui.EndMenu(self.ctx);

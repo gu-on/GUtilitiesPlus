@@ -3,7 +3,7 @@
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('lua.gutil_classic')
+require('Lua.gutil_classic')
 
 ---@class Source : Object
 ---@operator call: Source

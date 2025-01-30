@@ -41,7 +41,7 @@ end
 ---@return number
 ---@nodiscard
 function Str.ExtractNumber(input)
-    assert(type(input) == "string", debug.traceback())
+    assert(type(input) == "string", ("input '%s' is not a string\n"):format(input and tostring(input) or 'nil') .. debug.traceback())
     local start <const> = input:find("[%-%d]") or 1
     local final <const> = input:find("[^%.%d]", start + 1) or input:len() + 1
     local output = input:sub(start, final - 1)
@@ -71,4 +71,10 @@ function Str.Split(input, delimiter)
         table.insert(result, match)
     end
     return result
+end
+
+---https://www.programming-idioms.org/idiom/110/check-if-string-is-blank/6290/lua
+---@param input string
+function Str.IsBlank(input)
+    return #string.gsub(input, "^%s*(.-)%s*$", "%1") == 0
 end

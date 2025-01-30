@@ -3,7 +3,7 @@
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('lua.gutil_classic')
+require('Lua.gutil_classic')
 
 ---@alias TakeParamName_Number
 ---| '"D_STARTOFFS"' # start offset in source media, in seconds
@@ -140,6 +140,32 @@ function Take:SetValue(param, value) reaper.SetMediaItemTakeInfo_Value(self.id, 
 ---@nodiscard
 function Take:WildcardParse(input)
     return reaper.GU_WildcardParseTake(self.id, input)
+end
+
+---@class (exact) TakeMarkerInfo
+---@field idx integer
+---@field name string
+---@field col integer
+---@field pos number # in seconds, in local time (0 = start of item, not project)
+
+---@nodiscard
+function Take:GetMarkers()
+    local markers = {} ---@type TakeMarkerInfo[]
+
+    local markerCount <const> = reaper.GetNumTakeMarkers(self.id)
+    for i = 0, markerCount - 1 do
+        local rv, n, c = reaper.GetTakeMarker( self.id, i )
+        if rv then
+            table.insert(markers, { index = i, name = n, color = c, pos = rv - self:GetValue("D_STARTOFFS") })
+        end
+    end
+
+    return markers
+end
+
+---@param marker TakeMarkerInfo
+function Take:AddMarker(marker)
+    reaper.SetTakeMarker(self.id, -1, marker.name, marker.pos, marker.col)
 end
 
 return Take
