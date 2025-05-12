@@ -1,7 +1,7 @@
 -- @description GUtilities libraries (essential)
 -- @author guonaudio
 -- @version 2.3
--- @provides 
+-- @provides
 --   [nomain] .
 --   [nomain] Lua/gutil_classic.lua
 --   [nomain] Lua/gutil_color.lua
@@ -49,8 +49,8 @@ end
 function Os.IsMac()
     local os <const> = reaper.GetOS() ---@type OperatingSystems
     return
-        os == "OSX32" or 
-        os == "OSX64" or 
+        os == "OSX32" or
+        os == "OSX64" or
         os == "macOSarm64"
 end
 
@@ -118,18 +118,20 @@ do -- Check dependencies
     local mbMsg <const> = " is not installed.\n\nWould you like to be redirected now?"
     local errorMsg <const> = " is not installed.\n\nPlease ensure it is installed before using this script"
 
-    if not reaper.APIExists("GU_GUtilitiesAPI_GetVersion") then
-        error(
-            "GUtilitiesAPI is not installed. Please use ReaPack's Browse Packages feature and ensure that it is installed. " ..
-            "If you have installed it during this session, you will need to restart Reaper before it can be loaded.")
-    end
-    for _, info in pairs(DependencyInfo) do
-        if not reaper.APIExists(info.Func) then
-            local input <const> = Dialog.MB(info.Name .. mbMsg, "Error", 1)
-            if input == 1 then
-                Cmd.OpenURL(info.Web)
+    if not ShouldSkipDependencyCheck then -- for overriding to allow debug at script-level
+        if not reaper.APIExists("GU_GUtilitiesAPI_GetVersion") then
+            error(
+                "GUtilitiesAPI is not installed. Please use ReaPack's Browse Packages feature and ensure that it is installed. " ..
+                "If you have installed it during this session, you will need to restart Reaper before it can be loaded.")
+        end
+        for _, info in pairs(DependencyInfo) do
+            if not reaper.APIExists(info.Func) then
+                local input <const> = Dialog.MB(info.Name .. mbMsg, "Error", 1)
+                if input == 1 then
+                    Cmd.OpenURL(info.Web)
+                end
+                error(info.Name .. errorMsg)
             end
-            error(info.Name .. errorMsg)
         end
     end
 end
