@@ -12,7 +12,6 @@
 --   [nomain] Lua/gutil_table.lua
 --   [nomain] Reaper/gutil_action.lua
 --   [nomain] Reaper/gutil_config.lua
---   [nomain] Reaper/gutil_debug.lua
 --   [nomain] Reaper/gutil_gui.lua
 --   [nomain] Reaper/gutil_item.lua
 --   [nomain] Reaper/gutil_progressbar.lua

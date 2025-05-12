@@ -1,3 +1,5 @@
+-- @noindex
+
 --- https://forums.cockos.com/showthread.php?t=196829
 ---@param x number # value between 0 and 1
 ---@return number
