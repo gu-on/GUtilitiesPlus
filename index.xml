@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="GUtilitiesPlus" commit="8baf77903ef3eee1ee702b1fd5d200109a0430f2">
+<index version="1" name="GUtilitiesPlus" commit="c5a64a9f6933a5e14c4559a9c3776767e239e9a8">
   <category name="Extension">
     <reapack name="extension.ext" type="extension" desc="GUtilitiesAPI">
       <metadata>
@@ -569,6 +569,30 @@ Remove file class and replace with simply using io.open]]></changelog>
         <source file="Reaper/gutil_take.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9ba1cf2a79adef80ddf84542f9947a98213db339/Lib/Reaper/gutil_take.lua</source>
         <source file="Reaper/gutil_track.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9ba1cf2a79adef80ddf84542f9947a98213db339/Lib/Reaper/gutil_track.lua</source>
         <source file="Full/sourcevalidator.lua">https://github.com/gu-on/GUtilitiesPlus/raw/9ba1cf2a79adef80ddf84542f9947a98213db339/Lib/Full/sourcevalidator.lua</source>
+      </version>
+      <version name="2.3" author="guonaudio" time="2025-05-12T14:26:25Z">
+        <changelog><![CDATA[Remove os, cmd, and dependency libs (refactored into global)
+Added in new libs for fx and midi]]></changelog>
+        <source>https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/gutil_global.lua</source>
+        <source file="Lua/gutil_classic.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Lua/gutil_classic.lua</source>
+        <source file="Lua/gutil_color.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Lua/gutil_color.lua</source>
+        <source file="Lua/gutil_curve.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Lua/gutil_curve.lua</source>
+        <source file="Lua/gutil_filesystem.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Lua/gutil_filesystem.lua</source>
+        <source file="Lua/gutil_maths.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Lua/gutil_maths.lua</source>
+        <source file="Lua/gutil_string.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Lua/gutil_string.lua</source>
+        <source file="Lua/gutil_table.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Lua/gutil_table.lua</source>
+        <source file="Reaper/gutil_action.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_action.lua</source>
+        <source file="Reaper/gutil_config.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_config.lua</source>
+        <source file="Reaper/gutil_fx.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_fx.lua</source>
+        <source file="Reaper/gutil_gui.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_gui.lua</source>
+        <source file="Reaper/gutil_item.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_item.lua</source>
+        <source file="Reaper/gutil_midi.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_midi.lua</source>
+        <source file="Reaper/gutil_progressbar.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_progressbar.lua</source>
+        <source file="Reaper/gutil_project.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_project.lua</source>
+        <source file="Reaper/gutil_source.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_source.lua</source>
+        <source file="Reaper/gutil_take.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_take.lua</source>
+        <source file="Reaper/gutil_track.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Reaper/gutil_track.lua</source>
+        <source file="Full/sourcevalidator.lua">https://github.com/gu-on/GUtilitiesPlus/raw/c5a64a9f6933a5e14c4559a9c3776767e239e9a8/Lib/Full/sourcevalidator.lua</source>
       </version>
     </reapack>
   </category>
