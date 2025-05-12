@@ -1,6 +1,6 @@
 -- @description GUtilities libraries (essential)
 -- @author guonaudio
--- @version 2.2
+-- @version 2.3
 -- @provides 
 --   [nomain] .
 --   [nomain] Lua/gutil_classic.lua
@@ -24,6 +24,7 @@
 --   [nomain] Full/sourcevalidator.lua
 -- @changelog
 --   Remove os, cmd, and dependency libs (refactored into global)
+--   Added in new libs for fx and midi
 -- @about
 --   Main library for handling all other required libraries
 
