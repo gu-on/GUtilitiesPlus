@@ -57,3 +57,37 @@ function table.shallowcopy(t)
     end
     return copy
 end
+
+---http://lua-users.org/wiki/CopyTable
+---A deep copy copies all levels (or a specific subset of levels).
+---Here is a simple recursive implementation that additionally handles metatables and avoids the __pairs metamethod. 
+function table.deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[table.deepcopy(orig_key)] = table.deepcopy(orig_value)
+        end
+        setmetatable(copy, table.deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
+function table.reverse(t)
+    local n <const> = #t
+    for i = 1, n // 2 do
+        t[i], t[n - i + 1] = t[n - i + 1], t[i]
+    end
+end
+
+---Useful for when table's keys aren't simple increment form 1
+function table.length(t)
+    local count = 0
+    for _, _ in pairs(t) do
+        count = count + 1
+    end
+    return count
+end

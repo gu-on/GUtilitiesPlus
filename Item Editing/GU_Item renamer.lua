@@ -1,11 +1,9 @@
 -- @description Item renamer
 -- @author guonaudio
--- @version 1.3
+-- @version 1.4
 -- @changelog
---   Add support for special markers e.g. $marker(key)
---   Fix $lufs, $rms, and $peak to only follow item extents (before it followed the entire source extents)
---   Match require case to path case for Unix systems
---   Limit scroll wheel tooltip for specialRegions Markers and Regions to unique keys, and clamp Track X to 0 when no Items selected 
+--   Remove os lib (refactored into global)
+--   Added "recent" list to allow recalling recently used strings
 -- @about
 --   Batch renames items using similar wildcards annotation as in Reaper's own Render dialog.
 
@@ -20,7 +18,6 @@ require('Lua.gutil_table')
 require('Reaper.gutil_config')
 require('Reaper.gutil_gui')
 require('Reaper.gutil_item')
-require('Reaper.gutil_os')
 require('Reaper.gutil_project')
 require('Reaper.gutil_source')
 require('Reaper.gutil_take')
@@ -100,6 +97,7 @@ end
 ItemRenamer = GuiBase:extend()
 
 ItemRenamer.DefaultItemNumber = 1
+ItemRenamer.RecentSavedMax = 5
 
 ItemRenamer.Error = {
     NO_ITEM_SELECTION = "-- No items selected --",
@@ -122,10 +120,17 @@ function ItemRenamer:new(name, undoText)
 
     self.windowFlags = self.windowFlags + ImGui.WindowFlags_MenuBar
 
-    self.configKey = "replacementString"
     self.config = Config(FileSys.GetRawName(name))
+    self.cfgInfo = {}
+    
+    self.cfgInfo.repString = "replacementString"
+    self.cfgInfo.recent = {}
+    for i = 1, ItemRenamer.RecentSavedMax do
+        self.cfgInfo.recent[i] = "recent" .. tostring(i)
+    end
 
-    local value <const> = self.config:ReadString(self.configKey)
+    local value <const> = self.config:ReadString(self.cfgInfo.repString)
+    self:ReadRecent()
 
     self.items = Project(THIS_PROJECT):GetSelectedItems()
     self.input = value or ""
@@ -166,8 +171,6 @@ function ItemRenamer:ProcessItems()
 
         ::continue::
     end
-
-    self.config:Write(self.configKey, self.input)
 end
 
 ---@param value string
@@ -491,6 +494,17 @@ end
 
 function ItemRenamer:DrawMenu()
     if ImGui.BeginMenuBar(self.ctx) then
+        if ImGui.BeginMenu(self.ctx, "File") then
+            if ImGui.BeginMenu(self.ctx, "Recent") then
+                for i = 1, ItemRenamer.RecentSavedMax do
+                    if ImGui.MenuItem(self.ctx, ("%d: %s"):format(i, self.recent[i])) then
+                        self.input = self.recent[i]
+                    end
+                end
+                ImGui.EndMenu(self.ctx)
+            end
+            ImGui.EndMenu(self.ctx)
+        end
         if ImGui.BeginMenu(self.ctx, "Wildcards") then
             if ImGui.BeginMenu(self.ctx, "Project Information") then
                 self:DrawMenuItem(Wildcards.PROJECT, self:PrintProjectName())
@@ -552,6 +566,30 @@ function ItemRenamer:DrawMenu()
     end
 end
 
+function ItemRenamer:ReadRecent()
+    self.recent = {}
+    for i = 1, ItemRenamer.RecentSavedMax do
+        self.recent[i] = self.config:ReadString(self.cfgInfo.recent[i])
+    end
+end
+
+function ItemRenamer:SaveRecent()
+    self.config:Write(self.cfgInfo.repString, self.input)
+
+    if self.config:ReadString(self.cfgInfo.recent[1]) == self.input then return end -- Don't store recent if its already there
+
+    for i = ItemRenamer.RecentSavedMax, 2, -1 do
+        local temp <const> = self.config:ReadString(self.cfgInfo.recent[i - 1])
+        if not temp then goto continue end
+        self.config:Write(self.cfgInfo.recent[i], temp)
+        ::continue::
+    end
+
+    self.config:Write(self.cfgInfo.recent[1], self.input)
+
+    self:ReadRecent()
+end
+
 function ItemRenamer:Frame()
     local latestState <const> = reaper.GetProjectStateChangeCount(THIS_PROJECT)
     if self.lastProjectState ~= latestState then
@@ -572,6 +610,7 @@ function ItemRenamer:Frame()
     if ImGui.Button(self.ctx, "Apply") or ImGuiExt.IsEnterKeyPressed(self.ctx) then
         self:Begin()
         self:ProcessItems()
+        self:SaveRecent()
         self:Complete(4)
     end
 end

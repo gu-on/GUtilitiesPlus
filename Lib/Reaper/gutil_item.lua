@@ -102,16 +102,19 @@ function Item:GetActiveTake()
 end
 
 ---@nodiscard
-function Item:GetEnd() return reaper.GetMediaItemInfo_Value(self.id, "D_POSITION") + reaper.GetMediaItemInfo_Value(self.id, "D_LENGTH") end
+function Item:GetEnd() return reaper.GetMediaItemInfo_Value(self.id, "D_POSITION") +
+    reaper.GetMediaItemInfo_Value(self.id, "D_LENGTH") end
 
 ---@nodiscard
 function Item:GetStart() return reaper.GetMediaItemInfo_Value(self.id, "D_POSITION") end
 
 ---@param param ItemParamName_String
+---@return string
 ---@nodiscard
 function Item:GetString(param) return select(2, reaper.GetSetMediaItemInfo_String(self.id, param, "", false)) end
 
 ---@param param ItemParamName_Number
+---@return number
 ---@nodiscard
 function Item:GetValue(param) return reaper.GetMediaItemInfo_Value(self.id, param) end
 
@@ -159,5 +162,32 @@ function Item:SetTrack(track) reaper.MoveMediaItemToTrack(self.id, track.id) end
 function Item:SetValue(param, value) reaper.SetMediaItemInfo_Value(self.id, param, value) end
 
 function Item:UpdateInProject() reaper.UpdateItemInProject(self.id) end
+
+---@param positions number[]
+function Item:Split(positions)
+    local mediaItem = self.id
+    for _, position in pairs(positions) do
+        mediaItem = reaper.SplitMediaItem(mediaItem, position)
+        if not mediaItem then
+            break
+        end
+    end
+end
+
+---@param infos TakeMidiInfo[]
+function Item:MidiSplit(infos)
+    local mediaItem = self.id
+    local startPos = reaper.GetMediaItemInfo_Value(mediaItem, "D_POSITION")
+
+    for _, info in pairs(infos) do
+        if startPos >= info.posStart then goto continue end
+        mediaItem = reaper.SplitMediaItem(mediaItem, info.posStart)
+        if not mediaItem then
+            break
+        end
+        reaper.GetSetMediaItemInfo_String(mediaItem, "P_NOTES", ("key=%d vel=%d"):format(info.pitch, info.vel), true)
+        ::continue::
+    end
+end
 
 return Item

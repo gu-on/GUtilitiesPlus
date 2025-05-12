@@ -1,6 +1,6 @@
 -- @description GUtilities libraries (essential)
 -- @author guonaudio
--- @version 2.1
+-- @version 2.2
 -- @provides 
 --   [nomain] .
 --   [nomain] Lua/gutil_classic.lua
@@ -11,14 +11,10 @@
 --   [nomain] Lua/gutil_string.lua
 --   [nomain] Lua/gutil_table.lua
 --   [nomain] Reaper/gutil_action.lua
---   [nomain] Reaper/gutil_cmd.lua
 --   [nomain] Reaper/gutil_config.lua
---   [nomain] Reaper/gutil_dependency.lua
 --   [nomain] Reaper/gutil_debug.lua
---   [nomain] Reaper/gutil_dialog.lua
 --   [nomain] Reaper/gutil_gui.lua
 --   [nomain] Reaper/gutil_item.lua
---   [nomain] Reaper/gutil_os.lua
 --   [nomain] Reaper/gutil_progressbar.lua
 --   [nomain] Reaper/gutil_project.lua
 --   [nomain] Reaper/gutil_source.lua
@@ -26,16 +22,115 @@
 --   [nomain] Reaper/gutil_track.lua
 --   [nomain] Full/sourcevalidator.lua
 -- @changelog
---   Match require case to path case for Unix systems
---   Remove file class and replace with simply using io.open
+--   Remove os, cmd, and dependency libs (refactored into global)
 -- @about
 --   Main library for handling all other required libraries
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
-package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
+---@alias OperatingSystems
+---| "Win32" # Win32
+---| "Win64" # Win64
+---| "OSX32" # OSX32
+---| "OSX64" # OSX64
+---| "macOSarm64" # macOS-arm64
+---| "other" # Other
 
-Dependency = require('Reaper.gutil_dependency')
-Dependency.CheckAll()
+---@class Os
+Os = {}
+
+function Os.IsWin()
+    local os <const> = reaper.GetOS() ---@type OperatingSystems
+    return
+        os == "Win32" or
+        os == "Win64"
+end
+
+function Os.IsMac()
+    local os <const> = reaper.GetOS() ---@type OperatingSystems
+    return
+        os == "OSX32" or 
+        os == "OSX64" or 
+        os == "macOSarm64"
+end
+
+function reaper.IsLinuxOS()
+    return not Os.IsWin() and not Os.IsMac() -- may change in future?
+end
+
+---@class Cmd
+Cmd = {}
+
+---@param url string
+function Cmd.OpenURL(url)
+    local command <const> = Os.IsMac() and 'open "" "' .. url .. '"' or 'start "" "' .. url .. '"'
+    os.execute(command)
+end
+
+---@alias MessageBoxType
+---| 0 # OK
+---| 1 # OKCANCEL
+---| 2 # ABORTRETRYIGNORE
+---| 3 # YESNOCANCEL
+---| 4 # YESNO
+---| 5 # RETRYCANCEL
+
+---@alias MessageBoxReturn
+---| 1 # OK
+---| 2 # CANCEL
+---| 3 # ABORT
+---| 4 # RETRY
+---| 5 # IGNORE
+---| 6 # YES
+---| 7 # NO
+
+---@class Dialog
+Dialog = {}
+
+---comment
+---@param msg string
+---@param title string
+---@param mbtype MessageBoxType
+---@return MessageBoxReturn
+function Dialog.MB(msg, title, mbtype)
+    return reaper.MB(msg, title, mbtype)
+end
+
+---@class Debug
+Debug = {
+    enabled = false
+}
+
+---@param str string
+---@param ... unknown
+function Debug.Log(str, ...)
+    if not Debug.enabled then return end
+    reaper.ShowConsoleMsg(string.format(str, ...)) -- simple always on logging
+end
+
+do -- Check dependencies
+    DependencyInfo = {
+        { Name = "SWS",             Func = "CF_GetSWSVersion",        Web = "https://www.sws-extension.org" },
+        { Name = "ReaImGui",        Func = "ImGui_GetVersion",        Web = "https://forum.cockos.com/showthread.php?t=250419" },
+        { Name = "js_ReaScriptAPI", Func = "JS_ReaScriptAPI_Version", Web = "https://forum.cockos.com/showthread.php?t=212174" },
+    }
+
+    local mbMsg <const> = " is not installed.\n\nWould you like to be redirected now?"
+    local errorMsg <const> = " is not installed.\n\nPlease ensure it is installed before using this script"
+
+    if not reaper.APIExists("GU_GUtilitiesAPI_GetVersion") then
+        error(
+            "GUtilitiesAPI is not installed. Please use ReaPack's Browse Packages feature and ensure that it is installed. " ..
+            "If you have installed it during this session, you will need to restart Reaper before it can be loaded.")
+    end
+    for _, info in pairs(DependencyInfo) do
+        if not reaper.APIExists(info.Func) then
+            local input <const> = Dialog.MB(info.Name .. mbMsg, "Error", 1)
+            if input == 1 then
+                Cmd.OpenURL(info.Web)
+            end
+            error(info.Name .. errorMsg)
+        end
+    end
+end
 
 reaper.AudioFormats = { "WAV", "AIFF", "FLAC", "MP3", "OGG", "BWF", "W64", "WAVPACK" }
 

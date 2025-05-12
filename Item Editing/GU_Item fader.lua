@@ -1,8 +1,8 @@
 -- @description Item fader
 -- @author guonaudio
--- @version 1.3
+-- @version 1.4
 -- @changelog
---   Match require case to path case for Unix systems
+--   Remove os lib (refactored into global)
 -- @about
 --   Batch fades items based on percentage of length.
 
@@ -16,7 +16,6 @@ require('Lua.gutil_filesystem')
 require('Reaper.gutil_config')
 require('Reaper.gutil_gui')
 require('Reaper.gutil_item')
-require('Reaper.gutil_os')
 require('Reaper.gutil_project')
 
 ---@class FadeInfo : Object

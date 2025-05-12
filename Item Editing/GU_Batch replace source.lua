@@ -1,8 +1,8 @@
 -- @description Batch replace source
 -- @author guonaudio
--- @version 1.2b
+-- @version 1.3b
 -- @changelog
---   Match require case to path case for Unix systems
+--   Remove os, and debu libs (refactored into global)
 -- @about
 --   Batch replaces the source for the selected item's active take
 --   Search and replace is run recursively for a given path
@@ -15,10 +15,8 @@ require('Lua.gutil_classic')
 require('Lua.gutil_color')
 require('Lua.gutil_filesystem')
 require('Reaper.gutil_config')
-require('Reaper.gutil_debug')
 require('Reaper.gutil_gui')
 require('Reaper.gutil_item')
-require('Reaper.gutil_os')
 require('Reaper.gutil_project')
 require('Reaper.gutil_source')
 require('Reaper.gutil_take')

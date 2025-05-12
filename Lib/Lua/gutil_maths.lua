@@ -81,3 +81,30 @@ function Maths.Round(input, precision)
     local x <const> = 10 ^ precision
     return math.floor(input * x + 0.5) / x
 end
+
+---@param count integer
+---@param min number
+---@param max number
+---@return number[]
+function Maths.GetLogBands(count, min, max)
+    min = math.log(min, 10)
+    max = math.log(max, 10)
+
+    local step <const> = (max - min) / count
+    local bands = {}
+    for i = 0, count do
+        local freq <const> = 10 ^ (min + i * step)
+        table.insert(bands, freq)
+    end
+
+    return bands
+end
+
+---@param a number
+---@param b number
+---@param epsilon number?
+---@return boolean
+function Maths.IsNearly(a, b, epsilon)
+    epsilon = epsilon or 0.00001
+    return math.abs(a - b) < epsilon
+end

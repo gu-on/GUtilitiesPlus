@@ -13,7 +13,6 @@ require('Reaper.gutil_item')
 require('Reaper.gutil_project')
 require('Reaper.gutil_source')
 require('Reaper.gutil_progressbar')
-require('Reaper.gutil_os')
 require('Reaper.gutil_take')
 require('Reaper.gutil_track')
 

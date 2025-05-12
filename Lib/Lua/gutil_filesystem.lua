@@ -1,10 +1,5 @@
 -- @noindex
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
-package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
-
-require('Reaper.gutil_debug')
-
 ---@class FileSys
 FileSys = {}
 

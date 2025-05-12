@@ -55,7 +55,8 @@ end
 function Project:GetName() return reaper.GetProjectName(self.id) end
 
 ---@class (exact) MarkerInfo
----@field index integer
+---@field idx integer # index id of marker/region
+---@field order integer # position on timeline
 ---@field name string
 ---@field color integer
 ---@field startPos number # in seconds
@@ -72,10 +73,24 @@ function Project:GetMarkersAndRegions()
             reaper.EnumProjectMarkers3(self.id, i)
 
         if not isRegion then
-            local marker <const> = { index = _index, name = _name, startPos = _startPos, endPos = _endPos, color = _color } ---@type MarkerInfo
+            local marker <const> --[[@type MarkerInfo]] = {
+                idx = _index,
+                order = i,
+                name = _name,
+                startPos = _startPos,
+                endPos = _endPos,
+                color = _color 
+            }
             table.insert(markers, marker)
         else
-            local region <const> = { index = _index, name = _name, startPos = _startPos, endPos = _endPos, color = _color } ---@type RegionInfo
+            local region <const> --[[@type RegionInfo]] = {
+                idx = _index,
+                order = i,
+                name = _name,
+                startPos = _startPos,
+                endPos = _endPos,
+                color = _color
+            }
             table.insert(regions, region)
         end
     end
@@ -157,6 +172,11 @@ function Project:InsertMarker(pos, name, color)
     reaper.AddProjectMarker2( self.id, false, pos, 0, name, 0, color)
 end
 
+---@param idx integer
+function Project:DeleteMarker(idx)
+    return reaper.DeleteProjectMarkerByIndex(self.id, idx)
+end
+
 ---@param posStart number
 ---@param posEnd number
 ---@param name? string
@@ -172,10 +192,46 @@ function Project:GetCursorPos()
 end
 
 ---@param time number
-function Project:SetCursorPos(time)
-    reaper.SetEditCurPos2( self.id, time, false, false )
+function Project:SetCursorPos(time, shouldSeek)
+    reaper.SetEditCurPos2( self.id, time, shouldSeek, false )
 end
 
 function Project:SelectAllItems() reaper.SelectAllMediaItems(THIS_PROJECT, true) end
+
+---@class (exact) TimeSelection
+---@field posStart number
+---@field posEnd number
+
+---@return TimeSelection
+function Project:GetTimeSelection()
+    local _posStart <const>, _posEnd <const> = reaper.GetSet_LoopTimeRange2(self.id, false, false, 0, 0, false)
+    local timeSel <const> --[[@type TimeSelection]] = {
+        posStart = _posStart,
+        posEnd = _posEnd
+    }
+    return timeSel
+end
+
+---@param startPos number
+---@param endPos number
+function Project:SetTimeSelection(startPos, endPos)
+    reaper.GetSet_LoopTimeRange2(self.id, true, true, startPos, endPos, true)
+end
+
+---@return string
+function Project:GetPath()
+    local rv, proj = reaper.EnumProjects(-1)
+    if rv and proj then
+        return proj
+    else
+        return ""
+    end
+end
+
+function Project:GetStateChangeCount()
+    return reaper.GetProjectStateChangeCount(self.id)
+end
+
+function Project:Refresh() reaper.UpdateArrange() end
 
 return Project

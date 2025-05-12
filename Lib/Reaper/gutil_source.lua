@@ -72,3 +72,13 @@ function Source:IsLastSampleZero(eps)
 end
 
 function Source:IsMono() return reaper.GU_PCM_Source_IsMono(self.id) end
+
+---note: how to get data inside data https://forums.cockos.com/showthread.php?t=251462
+---@param identifier string
+---@return string
+function Source:GetMetadata(identifier)
+    local rv, value = reaper.GetMediaFileMetadata(self.id, identifier)
+    return rv and value or ""
+end
+
+return Source

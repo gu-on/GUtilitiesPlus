@@ -3,7 +3,6 @@
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('gutil_global')
 require('Lua.gutil_classic')
 require('Lua.gutil_string')
 
@@ -66,3 +65,5 @@ function Config:Write(key, value)
 
     if not success then Debug.Log("GU_Config_Write failed!\n") end
 end
+
+return Config

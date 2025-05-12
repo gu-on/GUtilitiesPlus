@@ -74,7 +74,8 @@ function GuiBase:Close()
     self.isOpen = false
 end
 
----@classic Font : Object
+---@class Font : Object
+---@operator call : Font
 Font = Object:extend()
 
 Font.SizeMin = 10
@@ -83,15 +84,17 @@ Font.SizeMax = 36
 function Font:new(ctx)
     self.ctx = ctx
     self.size = 14
-    local success <const>, value <const> = reaper.GU_Config_Read("GUtilities", "UserConfig", "fontSize")
+    -- local success <const>, value <const> = reaper.GU_Config_Read("GUtilities", "UserConfig", "fontSize")
+    -- local number <const> = tonumber(value)
+    local number = self.size
 
-    if not success or value == "" then return end
+    -- if not success or number == nil then return end
 
-    self.size = Maths.Clamp(tonumber(value), Font.SizeMin, Font.SizeMax)
+    self.size = Maths.Clamp(number, Font.SizeMin, Font.SizeMax)
 
     if self.size % 2 ~= 0 then self.size = self.size + 1 end -- even numbers look better
 
-    self.ptr = ImGui.CreateFont("Arial", self.size)
+    self.ptr = ImGui.CreateFont("Liberation Mono", self.size)
 end
 
 function Font:Attach()
@@ -142,8 +145,10 @@ end
 ---@param text string
 ---@param color integer
 function ImGuiExt.TableNextColumnEntry(ctx, text, color)
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, color);
-    ImGui.TableNextColumn(ctx);
-    ImGui.Text(ctx, tostring(text));
-    ImGui.PopStyleColor(ctx);
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, color)
+    ImGui.TableNextColumn(ctx)
+    ImGui.Text(ctx, tostring(text))
+    ImGui.PopStyleColor(ctx)
 end
+
+return GuiBase

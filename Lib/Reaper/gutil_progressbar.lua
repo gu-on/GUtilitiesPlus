@@ -58,3 +58,5 @@ end
 ---@field num number
 ---@field denom number
 ---@field gui ProgressBar
+
+return ProgressBar

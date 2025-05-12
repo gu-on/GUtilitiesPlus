@@ -3,8 +3,7 @@
 local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
-require('gutil_global')
-require('Reaper.gutil_debug')
+require('Lua.gutil_classic')
 
 ---@class Action : Object
 ---@operator call: Action
@@ -18,6 +17,10 @@ function Action:Begin()
     reaper.PreventUIRefresh(1)
     reaper.Undo_BeginBlock()
     Debug.Log("Action Begin\n")
+end
+
+function Action:Process()
+    -- to be inherited
 end
 
 ---@param undoState UndoState?

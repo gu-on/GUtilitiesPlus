@@ -1,9 +1,8 @@
 -- @description Item alias generator
 -- @author guonaudio
--- @version 2.0
+-- @version 2.1
 -- @changelog
---   Sets name, color, and snap offset for generated item alias from first overlapping Item.
---   Also adds Take Markers from all overlapping Items 
+--   Added notes to item alias
 -- @about
 --   Generates empty items in topmost parent track based on all overlapping items in child tracks
 
@@ -24,6 +23,7 @@ require('Reaper.gutil_track')
 ---@field name string
 ---@field col integer
 ---@field snapOffset number
+---@field notes string
 ---@field markers TakeMarkerInfo[]
 
 ---@class ItemAliasGen : Object, Action
@@ -47,6 +47,7 @@ function ItemAliasGen:AddToPrimoTracks(track, item)
         name = item:GetActiveTake():GetString("P_NAME"),
         col = toint(item:GetValue("I_CUSTOMCOLOR")),
         snapOffset = item:GetValue("D_SNAPOFFSET"),
+        notes = item:GetString("P_NOTES"),
         markers = item:GetActiveTake():GetMarkers()
     }
 
@@ -105,6 +106,7 @@ function ItemAliasGen:CreateBlankItems()
             local track <const> = Track(trackId)
             local item = track:CreateBlankItem("", itemAlias.startPos, itemAlias.endPos - itemAlias.startPos)
             item:GetActiveTake():SetString("P_NAME", itemAlias.name)
+            item:SetString("P_NOTES", itemAlias.notes)
             item:SetValue("I_CUSTOMCOLOR", itemAlias.col)
             item:SetValue("D_SNAPOFFSET", itemAlias.snapOffset)
             for _, marker in pairs(itemAlias.markers) do

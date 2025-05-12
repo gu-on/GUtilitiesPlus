@@ -1,8 +1,8 @@
 -- @description Source validator (export to CSV)
 -- @author guonaudio
--- @version 1.2
+-- @version 1.3
 -- @changelog
---   Match require case to path case for Unix systems
+--   Remove os and dialog libs (refactored into global)
 -- @about
 --   Collates information about source audio within the project.
 --   This tool skips loading the GUI, and instead exports directly to CSV.
@@ -12,7 +12,6 @@ package.path = package.path:find(requirePath) and package.path or package.path .
 
 require('gutil_global')
 require('Full.sourcevalidator')
-require('Reaper.gutil_dialog')
 
 local gui <const> = GuiSrcValidator("GU_Source validator.lua", "NA", false)
 

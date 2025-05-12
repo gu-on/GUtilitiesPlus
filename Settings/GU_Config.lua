@@ -1,8 +1,8 @@
 -- @description GUtilities scripts config
 -- @author guonaudio
--- @version 1.3
+-- @version 1.4
 -- @changelog
---   Match require case to path case for Unix systems
+--   Remove os, and deb libs (refactored into global)
 -- @about
 --   Provides global settings for GUtilities Scripts
 --   This script must be included by ReaPack to ensure all libraries are donwloaded
@@ -14,9 +14,7 @@ require('gutil_global')
 require('Lua.gutil_filesystem')
 require('Lua.gutil_maths')
 require('Reaper.gutil_config')
-require('Reaper.gutil_debug')
 require('Reaper.gutil_gui')
-require('Reaper.gutil_os')
 
 ---@class UserConfig : GuiBase
 UserConfig = GuiBase:extend()

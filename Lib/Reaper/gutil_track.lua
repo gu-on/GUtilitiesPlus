@@ -152,4 +152,34 @@ function Track:SetString(param, value) reaper.GetSetMediaTrackInfo_String(self.i
 ---@param value number
 function Track:SetValue(param, value) reaper.SetMediaTrackInfo_Value(self.id, param, value) end
 
+function Track:GetItems()
+    local items = {} ---@type Item[]
+    for i = 0, reaper.GetTrackNumMediaItems(self.id) - 1 do
+        local item <const> = Item(reaper.GetTrackMediaItem(self.id, i))
+        table.insert(items, item)
+    end
+    return items
+end
+
+
+
+function Track:GetEnvelopes()
+    -- for i = 0, reaper.CountTrackEnvelopes(self.id) - 1 do
+    --     local env = reaper.GetTrackEnvelope(self.id, i)
+    --     reaper.GetTrackEnvelopeByName( track, envname )
+    --     reaper.ShowConsoleMsg(("%s\n"):format(tostring(env)))
+    -- end
+
+    local envelope = reaper.GetTrackEnvelopeByName(self.id, "Trim Volume")
+    reaper.ShowConsoleMsg(("%s\n"):format(envelope))
+    if envelope then
+        local _, chunk = reaper.GetEnvelopeStateChunk(envelope, "", false)
+
+        envelope = reaper.BR_EnvAlloc(envelope, false)
+        local active, visible, armed, inLane, laneHeight, defaultShape, minValue, maxValue, centerValue, type, faderScaling, automationItemsOptions = reaper.BR_EnvGetProperties( envelope )
+        reaper.BR_EnvSetProperties(envelope, true, true, armed, inLane, laneHeight, defaultShape, faderScaling, automationItemsOptions)
+        reaper.BR_EnvFree(envelope, true)
+    end
+end
+
 return Track

@@ -1,8 +1,5 @@
 {
     "Lua.diagnostics.globals": [
         "reaper"
-    ],
-    "Lua.diagnostics.disable": [
-        "redundant-parameter"
     ]
 }

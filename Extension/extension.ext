@@ -1,14 +1,14 @@
 @description GUtilitiesAPI
-@version 0.1.3
+@version 0.1.4
 @author guonaudio
 @about
   REAPER Plug-in Extension providing ReaScript API for audio editing and analysis
 @changelog
-  - Added special marker support to renamer, and fixed lufs, rms, and peak calculations to follow item extents
+  - Standardised naming for dlls on macOS
 @provides
-  [darwin32] reaper_gutilities-i386.dylib https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-i386.dylib
-  [darwin64] reaper_gutilities-x86_64.dylib https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-x86_64.dylib
-  [darwin-arm64] reaper_gutilities-arm64.dylib https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-arm64.dylib
+  [darwin32] reaper_gutilitiesapi-i386.dylib https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-i386.dylib
+  [darwin64] reaper_gutilitiesapi-x86_64.dylib https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-x86_64.dylib
+  [darwin-arm64] reaper_gutilitiesapi-arm64.dylib https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-arm64.dylib
   [linux32] reaper_gutilitiesapi-i686.so https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-i686.so
   [linux64] reaper_gutilitiesapi-x86_64.so https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-x86_64.so
   [linux-armv7l] reaper_gutilitiesapi-armv7l.so https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-armv7l.so

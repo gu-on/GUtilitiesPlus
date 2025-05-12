@@ -1,8 +1,8 @@
 -- @description Batch import
 -- @author guonaudio
--- @version 1.2
+-- @version 1.3
 -- @changelog
---   Match require case to path case for Unix systems
+--   Remove os, debug and dialog libs (refactored into global)
 -- @about
 --   Batch imports media files recursively from a given source directory
 
@@ -15,10 +15,7 @@ require('Lua.gutil_filesystem')
 require('Lua.gutil_maths')
 require('Reaper.gutil_action')
 require('Reaper.gutil_config')
-require('Reaper.gutil_debug')
-require('Reaper.gutil_dialog')
 require('Reaper.gutil_item')
-require('Reaper.gutil_os')
 require('Reaper.gutil_progressbar')
 require('Reaper.gutil_project')
 require('Reaper.gutil_take')

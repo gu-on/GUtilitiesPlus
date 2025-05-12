@@ -5,6 +5,11 @@ Color = {}
 
 Color.White = 0xffffffff
 Color.Red = 0xff0000ff
+Color.Green = 0x00ff00ff
+Color.Yellow = 0xffff00ff
+Color.Orange = 0xff9900ff
+Color.Blank = 0xffffff00
+Color.GhostWhite = 0xffffff1a
 Color.MaxAlpha = 255
 
 ---@param red integer

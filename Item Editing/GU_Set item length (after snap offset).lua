@@ -1,8 +1,8 @@
 -- @description Set item length after snap offset
 -- @author guonaudio
--- @version 1.2
+-- @version 1.3
 -- @changelog
---   Match require case to path case for Unix systems
+--   Remove os lib (refactored into global)
 -- @about
 --   Sets the length of the item to the right of its snap offset (in seconds)
 
@@ -14,7 +14,6 @@ require('Lua.gutil_filesystem')
 require('Reaper.gutil_config')
 require('Reaper.gutil_gui')
 require('Reaper.gutil_item')
-require('Reaper.gutil_os')
 require('Reaper.gutil_project')
 
 ---@class AdjusterAfter : GuiBase
