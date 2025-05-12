@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="GUtilitiesPlus" commit="0e6b8c251cd504a1b824458d1723aa309f9d57ea">
+<index version="1" name="GUtilitiesPlus" commit="8af365b09f3a7d767bfc68d0af943adfb1c094b6">
   <category name="Extension">
     <reapack name="extension.ext" type="extension" desc="GUtilitiesAPI">
       <metadata>
@@ -35,6 +35,19 @@
         <source platform="win64" file="reaper_gutilitiesapi-x64.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-x64.dll</source>
         <source platform="windows-arm64ec" file="reaper_gutilitiesapi-arm64ec.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.2/reaper_gutilitiesapi-arm64ec.dll</source>
       </version>
+      <version name="0.1.3" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[- Added special marker support to renamer, and fixed lufs, rms, and peak calculations to follow item extents]]></changelog>
+        <source platform="darwin32" file="reaper_gutilities-i386.dylib">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-i386.dylib</source>
+        <source platform="darwin64" file="reaper_gutilities-x86_64.dylib">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-x86_64.dylib</source>
+        <source platform="darwin-arm64" file="reaper_gutilities-arm64.dylib">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-arm64.dylib</source>
+        <source platform="linux32" file="reaper_gutilitiesapi-i686.so">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-i686.so</source>
+        <source platform="linux64" file="reaper_gutilitiesapi-x86_64.so">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-x86_64.so</source>
+        <source platform="linux-armv7l" file="reaper_gutilitiesapi-armv7l.so">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-armv7l.so</source>
+        <source platform="linux-aarch64" file="reaper_gutilitiesapi-aarch64.so">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-aarch64.so</source>
+        <source platform="win32" file="reaper_gutilitiesapi-x86.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-x86.dll</source>
+        <source platform="win64" file="reaper_gutilitiesapi-x64.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-x64.dll</source>
+        <source platform="windows-arm64ec" file="reaper_gutilitiesapi-arm64ec.dll">https://github.com/gu-on/GUtilitiesAPI/releases/download/v0.1.3/reaper_gutilitiesapi-arm64ec.dll</source>
+      </version>
     </reapack>
   </category>
   <category name="Item Editing">
@@ -56,6 +69,10 @@
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Batch%20import.lua</source>
       </version>
+      <version name="1.2" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Batch%20import.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Batch replace source.lua" type="script" desc="Batch replace source">
       <metadata>
@@ -75,6 +92,10 @@
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Batch%20replace%20source.lua</source>
       </version>
+      <version name="1.2b" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Batch%20replace%20source.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Item alias generator.lua" type="script" desc="Item alias generator">
       <metadata>
@@ -82,7 +103,7 @@
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
 \widowctrl\hyphauto
 
-{\pard \ql \f0 \sa180 \li0 \fi0 Generates empty items in parent track based on all overlapping items in child tracks\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Generates empty items in topmost parent track based on all overlapping items in child tracks\par}
 }
 ]]></description>
       </metadata>
@@ -93,6 +114,11 @@
       <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Item%20alias%20generator.lua</source>
+      </version>
+      <version name="2.0" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Sets name, color, and snap offset for generated item alias from first overlapping Item.
+Also adds Take Markers from all overlapping Items ]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Item%20alias%20generator.lua</source>
       </version>
     </reapack>
     <reapack name="GU_Item fader.lua" type="script" desc="Item fader">
@@ -117,6 +143,10 @@
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Item%20fader.lua</source>
       </version>
+      <version name="1.3" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Item%20fader.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Item renamer.lua" type="script" desc="Item renamer">
       <metadata>
@@ -135,6 +165,13 @@
       <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Item%20renamer.lua</source>
+      </version>
+      <version name="1.3" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Add support for special markers e.g. $marker(key)
+Fix $lufs, $rms, and $peak to only follow item extents (before it followed the entire source extents)
+Match require case to path case for Unix systems
+Limit scroll wheel tooltip for specialRegions Markers and Regions to unique keys, and clamp Track X to 0 when no Items selected ]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Item%20renamer.lua</source>
       </version>
     </reapack>
     <reapack name="GU_Move selected items to track with same name.lua" type="script" desc="Move selected items to track with same name">
@@ -155,6 +192,10 @@
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Move%20selected%20items%20to%20track%20with%20same%20name.lua</source>
       </version>
+      <version name="1.2" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Move%20selected%20items%20to%20track%20with%20same%20name.lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Set item length (after snap offset).lua" type="script" desc="Set item length after snap offset">
       <metadata>
@@ -173,6 +214,10 @@
       <version name="1.1" author="guonaudio" time="2024-12-31T18:14:20Z">
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Set%20item%20length%20(after%20snap%20offset).lua</source>
+      </version>
+      <version name="1.2" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Set%20item%20length%20(after%20snap%20offset).lua</source>
       </version>
     </reapack>
     <reapack name="GU_Set item length (before snap offset).lua" type="script" desc="Set item length before snap offset">
@@ -194,6 +239,10 @@
 Fixed bug where Item with Take containing stretch markers wouldn't be affected]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Set%20item%20length%20(before%20snap%20offset).lua</source>
       </version>
+      <version name="1.2" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Set%20item%20length%20(before%20snap%20offset).lua</source>
+      </version>
     </reapack>
     <reapack name="GU_SFZ creator.lua" type="script" desc="SFZ creator">
       <metadata>
@@ -208,6 +257,10 @@ Fixed bug where Item with Take containing stretch markers wouldn't be affected]]
       <version name="1.0b" author="guonaudio" time="2024-12-31T18:14:20Z">
         <changelog><![CDATA[Initial Release]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_SFZ%20creator.lua</source>
+      </version>
+      <version name="1.2b" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_SFZ%20creator.lua</source>
       </version>
     </reapack>
     <reapack name="GU_Source validator (export to CSV).lua" type="script" desc="Source validator (export to CSV)">
@@ -228,6 +281,10 @@ Fixed bug where Item with Take containing stretch markers wouldn't be affected]]
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Source%20validator%20(export%20to%20CSV).lua</source>
       </version>
+      <version name="1.2" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Source%20validator%20(export%20to%20CSV).lua</source>
+      </version>
     </reapack>
     <reapack name="GU_Source validator.lua" type="script" desc="Source Validator">
       <metadata>
@@ -247,10 +304,14 @@ Fixed bug where Item with Take containing stretch markers wouldn't be affected]]
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Item%20Editing/GU_Source%20validator.lua</source>
       </version>
+      <version name="1.2" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Item%20Editing/GU_Source%20validator.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="Lib">
-    <reapack name="gutil_global.lua" type="script" desc="GUtilities libraries">
+    <reapack name="gutil_global.lua" type="script" desc="GUtilities libraries (essential)">
       <metadata>
         <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 \fmodern Courier;}}
 {\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
@@ -366,6 +427,33 @@ Fixed bug where Item with Take containing stretch markers wouldn't be affected]]
         <source file="Reaper/gutil_track.lua">https://github.com/gu-on/GUtilitiesPlus/raw/0e6b8c251cd504a1b824458d1723aa309f9d57ea/Lib/Reaper/gutil_track.lua</source>
         <source file="Full/sourcevalidator.lua">https://github.com/gu-on/GUtilitiesPlus/raw/0e6b8c251cd504a1b824458d1723aa309f9d57ea/Lib/Full/sourcevalidator.lua</source>
       </version>
+      <version name="2.1" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems
+Remove file class and replace with simply using io.open]]></changelog>
+        <source>https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/gutil_global.lua</source>
+        <source file="Lua/gutil_classic.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Lua/gutil_classic.lua</source>
+        <source file="Lua/gutil_color.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Lua/gutil_color.lua</source>
+        <source file="Lua/gutil_curve.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Lua/gutil_curve.lua</source>
+        <source file="Lua/gutil_filesystem.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Lua/gutil_filesystem.lua</source>
+        <source file="Lua/gutil_maths.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Lua/gutil_maths.lua</source>
+        <source file="Lua/gutil_string.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Lua/gutil_string.lua</source>
+        <source file="Lua/gutil_table.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Lua/gutil_table.lua</source>
+        <source file="Reaper/gutil_action.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_action.lua</source>
+        <source file="Reaper/gutil_cmd.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_cmd.lua</source>
+        <source file="Reaper/gutil_config.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_config.lua</source>
+        <source file="Reaper/gutil_dependency.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_dependency.lua</source>
+        <source file="Reaper/gutil_debug.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_debug.lua</source>
+        <source file="Reaper/gutil_dialog.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_dialog.lua</source>
+        <source file="Reaper/gutil_gui.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_gui.lua</source>
+        <source file="Reaper/gutil_item.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_item.lua</source>
+        <source file="Reaper/gutil_os.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_os.lua</source>
+        <source file="Reaper/gutil_progressbar.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_progressbar.lua</source>
+        <source file="Reaper/gutil_project.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_project.lua</source>
+        <source file="Reaper/gutil_source.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_source.lua</source>
+        <source file="Reaper/gutil_take.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_take.lua</source>
+        <source file="Reaper/gutil_track.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Reaper/gutil_track.lua</source>
+        <source file="Full/sourcevalidator.lua">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Lib/Full/sourcevalidator.lua</source>
+      </version>
     </reapack>
   </category>
   <category name="Settings">
@@ -400,6 +488,10 @@ Fixed bug where Item with Take containing stretch markers wouldn't be affected]]
       <version name="1.2" author="guonaudio" time="2024-12-31T18:14:20Z">
         <changelog><![CDATA[Refactor to make better use of Lua Language Server]]></changelog>
         <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8382d6aa3a5f4661cbd82e15742b02649fe43d92/Settings/GU_Config.lua</source>
+      </version>
+      <version name="1.3" author="guonaudio" time="2025-01-30T19:31:34Z">
+        <changelog><![CDATA[Match require case to path case for Unix systems]]></changelog>
+        <source main="main">https://github.com/gu-on/GUtilitiesPlus/raw/8af365b09f3a7d767bfc68d0af943adfb1c094b6/Settings/GU_Config.lua</source>
       </version>
     </reapack>
   </category>
