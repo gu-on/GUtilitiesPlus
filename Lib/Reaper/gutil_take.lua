@@ -214,6 +214,32 @@ function Take:GetMidi()
     return midi
 end
 
+function Take:GetSelectedMidi()
+    local midi = {} ---@type TakeMidiInfo[]
+
+    local index = -1
+    while true do
+        local note <const> = reaper.MIDI_EnumSelNotes(self.id, index)
+        if note == -1 then break end
+
+        local rv <const>, _, _, _noteStart <const>, _noteEnd <const>, _chan <const>, _pitch <const>, _vel <const> =
+            reaper.MIDI_GetNote(self.id, note)
+        if rv then
+            local midiInfo <const> --[[@type TakeMidiInfo]] = {
+                posStart = reaper.MIDI_GetProjTimeFromPPQPos(self.id, _noteStart),
+                posEnd = reaper.MIDI_GetProjTimeFromPPQPos(self.id, _noteEnd),
+                chan = _chan,
+                pitch = _pitch,
+                vel = _vel,
+            }
+            table.insert(midi, midiInfo)
+        end
+        index = note
+    end
+
+    return midi
+end
+
 ---@return Item
 function Take:GetItem()
     return Item(reaper.GetMediaItemTake_Item(self.id))
