@@ -1,6 +1,6 @@
 -- @description GUtilities libraries (essential)
 -- @author guonaudio
--- @version 2.3
+-- @version 2.4
 -- @provides
 --   [nomain] .
 --   [nomain] Lua/gutil_classic.lua
@@ -23,8 +23,8 @@
 --   [nomain] Reaper/gutil_track.lua
 --   [nomain] Full/sourcevalidator.lua
 -- @changelog
---   Remove os, cmd, and dependency libs (refactored into global)
---   Added in new libs for fx and midi
+--   Update path to work in Linux
+--   Fixed font size scaling, so UI can scale if changed in GU_Config.lua
 -- @about
 --   Main library for handling all other required libraries
 

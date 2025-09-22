@@ -1,12 +1,12 @@
 -- @description SFZ creator
 -- @author guonaudio
--- @version 1.3b
+-- @version 1.4b
 -- @changelog
---   Remove os lib (refactored into global), and refactored out MIDI lib
+--   Update path to work in Linux
 -- @about
 --   Move items to first found track with the same name
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

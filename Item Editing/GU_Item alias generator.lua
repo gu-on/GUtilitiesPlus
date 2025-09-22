@@ -1,12 +1,12 @@
 -- @description Item alias generator
 -- @author guonaudio
--- @version 2.1
+-- @version 2.2
 -- @changelog
---   Added notes to item alias
+--   Update path to work in Linux
 -- @about
 --   Generates empty items in topmost parent track based on all overlapping items in child tracks
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

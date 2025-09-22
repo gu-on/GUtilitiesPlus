@@ -1,12 +1,12 @@
 -- @description Item fader
 -- @author guonaudio
--- @version 1.4
+-- @version 1.5
 -- @changelog
---   Remove os lib (refactored into global)
+--   Update path to work in Linux
 -- @about
 --   Batch fades items based on percentage of length.
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

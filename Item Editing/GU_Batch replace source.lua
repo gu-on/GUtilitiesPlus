@@ -1,13 +1,13 @@
 -- @description Batch replace source
 -- @author guonaudio
--- @version 1.3b
+-- @version 1.4b
 -- @changelog
---   Remove os, and debu libs (refactored into global)
+--   Update path to work in Linux
 -- @about
 --   Batch replaces the source for the selected item's active take
 --   Search and replace is run recursively for a given path
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

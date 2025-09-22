@@ -1,12 +1,12 @@
 -- @description Set item length before snap offset
 -- @author guonaudio
--- @version 1.3
+-- @version 1.4
 -- @changelog
---   Remove os lib (refactored into global)
+--   Update path to work in Linux
 -- @about
 --   Sets the length of the item to the left of its snap offset (in seconds)
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

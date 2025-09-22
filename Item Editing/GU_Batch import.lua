@@ -1,12 +1,12 @@
 -- @description Batch import
 -- @author guonaudio
--- @version 1.3
+-- @version 1.4
 -- @changelog
---   Remove os, debug and dialog libs (refactored into global)
+--   Update path to work in Linux
 -- @about
 --   Batch imports media files recursively from a given source directory
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

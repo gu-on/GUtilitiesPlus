@@ -1,13 +1,13 @@
 -- @description GUtilities scripts config
 -- @author guonaudio
--- @version 1.4
+-- @version 1.5
 -- @changelog
---   Remove os, and deb libs (refactored into global)
+--   Update path to work in Linux
 -- @about
 --   Provides global settings for GUtilities Scripts
 --   This script must be included by ReaPack to ensure all libraries are donwloaded
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

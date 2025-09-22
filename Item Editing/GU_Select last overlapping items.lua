@@ -1,12 +1,12 @@
 -- @description Select last overlapping items
 -- @author guonaudio
--- @version 1.0
+-- @version 1.1
 -- @changelog
---   Initial release
+--   Update path to work in Linux
 -- @about
 --   Selects last Item for any given set of overlapping Items, per track 
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

@@ -1,6 +1,6 @@
 -- @noindex
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('Lua.gutil_classic')
@@ -84,11 +84,10 @@ Font.SizeMax = 36
 function Font:new(ctx)
     self.ctx = ctx
     self.size = 14
-    -- local success <const>, value <const> = reaper.GU_Config_Read("GUtilities", "UserConfig", "fontSize")
-    -- local number <const> = tonumber(value)
-    local number = self.size
+    local success <const>, value <const> = reaper.GU_Config_Read("GUtilities", "UserConfig", "fontSize")
+    local number <const> = tonumber(value)
 
-    -- if not success or number == nil then return end
+    if not success or number == nil then return end
 
     self.size = Maths.Clamp(number, Font.SizeMin, Font.SizeMax)
 

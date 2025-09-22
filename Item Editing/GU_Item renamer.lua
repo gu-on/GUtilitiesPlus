@@ -1,13 +1,12 @@
 -- @description Item renamer
 -- @author guonaudio
--- @version 1.4
+-- @version 1.5
 -- @changelog
---   Remove os lib (refactored into global)
---   Added "recent" list to allow recalling recently used strings
+--   Update path to work in Linux
 -- @about
 --   Batch renames items using similar wildcards annotation as in Reaper's own Render dialog.
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')

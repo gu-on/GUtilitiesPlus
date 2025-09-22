@@ -1,13 +1,13 @@
 -- @description Source Validator
 -- @author guonaudio
--- @version 1.2
+-- @version 1.4
 -- @changelog
---   Match require case to path case for Unix systems
+--   Update path to work in Linux
 -- @about
 --   Displays collated information about source audio within the project.
 --   This tool can also flag files which don't meet user customisable standards.
 
-local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../lib/?.lua'
+local requirePath <const> = debug.getinfo(1).source:match("@?(.*[\\|/])") .. '../Lib/?.lua'
 package.path = package.path:find(requirePath) and package.path or package.path .. ";" .. requirePath
 
 require('gutil_global')
